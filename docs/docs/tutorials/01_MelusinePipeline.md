@@ -11,6 +11,6 @@ The `MelusinePipeline` class is at the core of melusine. It inherits from the `s
 
 [//]: # (```Python)
 
-[//]: # ({!../../src/melusine_core/docs/MelusinePipeline/tutorial001.py!})
+[//]: # ({!../../src/melusine/docs/MelusinePipeline/tutorial001.py!})
 
 [//]: # (```)

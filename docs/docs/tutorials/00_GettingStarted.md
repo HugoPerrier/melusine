@@ -34,7 +34,7 @@ A typical code for a melusine-based application looks like this :
 
 [//]: # (```Python)
 
-[//]: # ({!../../src/melusine_core/docs/GettingStarted/tutorial001.py!})
+[//]: # ({!../../src/melusine/docs/GettingStarted/tutorial001.py!})
 
 [//]: # (```)
 
@@ -92,7 +92,7 @@ End users typically want to know what lead melusine to a specific detection resu
 
 [//]: # (```Python hl_lines="8")
 
-[//]: # ({!../../src/melusine_core/docs/GettingStarted/tutorial002.py!})
+[//]: # ({!../../src/melusine/docs/GettingStarted/tutorial002.py!})
 
 [//]: # (```)
 

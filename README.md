@@ -11,7 +11,7 @@ All new features can be found in the **full pipeline [tutorial](https://github.c
 
 # Melusine
 
-<!-- <img src=`docs/_static/melusine.png` width=`200`/> -->
+<!-- <img docs_src=`docs/_static/melusine.png` width=`200`/> -->
 ![](docs/_static/melusine.png)
 
 - Free software: Apache Software License 2.0
@@ -34,7 +34,7 @@ Use **Melusine** if you need a library which:
 
 This package is designed for the preprocessing, classification and automatic summarization of emails written in french.
 
-<!-- <img src=`docs/_static/schema_1.png` width=`600`/> -->
+<!-- <img docs_src=`docs/_static/schema_1.png` width=`600`/> -->
 ![](docs/_static/schema_1.png)
 
 **3 main subpackages are offered :**

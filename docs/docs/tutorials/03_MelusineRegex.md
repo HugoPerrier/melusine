@@ -3,6 +3,6 @@
 [//]: # ()
 [//]: # (```Python)
 
-[//]: # ({!../../src/melusine_core/docs/MelusineRegex/tutorial001.py!})
+[//]: # ({!../../src/melusine/docs/MelusineRegex/tutorial001.py!})
 
 [//]: # (```)

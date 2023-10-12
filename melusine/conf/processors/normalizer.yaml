@@ -1,0 +1,23 @@
+email_normalizer:
+  form: NFKD
+  input_columns:
+  - messages
+  lowercase: true
+  output_columns:
+  - messages
+
+normalizer:
+  form: NFKD
+  input_columns:
+  - body
+  lowercase: false
+  output_columns:
+  - text
+
+header_normalizer:
+  form: NFKD
+  input_columns:
+  - header
+  lowercase: true
+  output_columns:
+  - clean_header

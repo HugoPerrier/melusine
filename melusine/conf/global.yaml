@@ -1,0 +1,5 @@
+global:
+  models_dir: models
+  word_embeddings_dir: word_embeddings
+  test_shared_variable: ${TEST_VAR}  # For demonstration purpose
+  # test_shared_env_variable: ${TEST_ENV_VAR}  # For demonstration purpose
