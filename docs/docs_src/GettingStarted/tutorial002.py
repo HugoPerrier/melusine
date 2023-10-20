@@ -7,8 +7,8 @@ df = load_email_data()
 # Activate debug mode
 df.debug = True
 
-# # Load the default pipeline
-# pipeline = MelusinePipeline.from_config("demo_pipeline")
-#
-# # Run the pipeline
-# df = pipeline.transform(df)
+# Load the default pipeline
+pipeline = MelusinePipeline.from_config("demo_pipeline")
+
+# Run the pipeline
+df = pipeline.transform(df)

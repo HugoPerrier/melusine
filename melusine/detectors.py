@@ -9,7 +9,7 @@ from typing import Any, Dict, List, Tuple
 
 from melusine.base import MelusineDetector, MelusineItem, MelusineRegex
 from melusine.message import Message
-from melusine.regex import ReplyRegex, ThanksRegex, TransferRegex, VacationReplyRegex
+from melusine.regex import EmergencyRegex, ReplyRegex, ThanksRegex, TransferRegex, VacationReplyRegex
 
 
 class ThanksDetector(MelusineDetector):
@@ -554,4 +554,130 @@ class TransferDetector(MelusineDetector):
             Updated row.
         """
         # No implementation needed
+        return row
+
+
+class EmergencyDetector(MelusineDetector):
+    """
+    Implement a detector which detects automatic response message like vacation or out of office replies.
+    """
+
+    # Class constants
+    CONST_TEXT_COL_NAME: str = "effective_text"
+    CONST_DEBUG_TEXT_KEY: str = "text"
+
+    def __init__(
+        self,
+        name: str,
+        header_column: str = "header",
+        text_column: str = "det_normalized_last_body",
+    ) -> None:
+        """
+        Attributes initialization.
+
+        Parameters
+        ----------
+        name: str
+            Detector's name.
+        header_column: str
+            Name of the column containing the text of the email.
+        """
+        self.header_column = header_column
+        self.text_column = text_column
+
+        # Detection regex
+        self.regex: MelusineRegex = EmergencyRegex()
+
+        # Input columns
+        input_columns: List[str] = [header_column, text_column]
+
+        # Output columns
+        self.result_column = f"{name}_result"
+        output_columns: List[str] = [self.result_column]
+
+        super().__init__(
+            name=name,
+            input_columns=input_columns,
+            output_columns=output_columns,
+        )
+
+    def pre_detect(self, row: MelusineItem, debug_mode: bool = False) -> MelusineItem:
+        """
+        Extract/prepare the text to analyse.
+
+        Parameters
+        ----------
+        row: MelusineItem
+            Content of an email.
+        debug_mode: bool
+            Debug mode activation flag.
+
+        Returns
+        -------
+        row: MelusineItem
+            Updated row.
+        """
+        # Last message body
+        message_text: str = row[self.text_column]
+        header: str = row[self.header_column]
+
+        row[self.CONST_TEXT_COL_NAME] = "\n".join([header, message_text])
+
+        # Prepare and save debug data
+        if debug_mode:
+            debug_dict: Dict[str, Any] = {
+                self.CONST_DEBUG_TEXT_KEY: row[self.CONST_TEXT_COL_NAME],
+            }
+            row[self.debug_dict_col].update(debug_dict)
+
+        return row
+
+    def detect(self, row: MelusineItem, debug_mode: bool = False) -> MelusineItem:
+        """
+        Apply regex on the effective text.
+
+        Parameters
+        ----------
+        row: MelusineItem
+            Content of an email.
+        debug_mode: bool
+            Debug mode activation flag.
+
+        Returns
+        -------
+        row: MelusineItem
+            Updated row.
+        """
+        debug_info: Dict[str, Any] = {}
+
+        text: str = row[self.CONST_TEXT_COL_NAME]
+
+        detection_data = self.regex.match(text)
+        detection_result = detection_data[self.regex.MATCH_RESULT]
+
+        # Save debug data
+        if debug_mode:
+            debug_info[self.regex.regex_name] = detection_data
+            row[self.debug_dict_col].update(debug_info)
+
+        row[self.result_column] = detection_result
+
+        return row
+
+    def post_detect(self, row: MelusineItem, debug_mode: bool = False) -> MelusineItem:
+        """
+        Apply final eligibility rule.
+
+        Parameters
+        ----------
+        row: MelusineItem
+            Content of an email.
+        debug_mode: bool
+            Debug mode activation flag.
+
+        Returns
+        -------
+        row: MelusineItem
+            Updated row.
+        """
         return row

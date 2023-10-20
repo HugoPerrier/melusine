@@ -6,6 +6,10 @@ from typing import Any, Optional
 
 import pandas as pd
 
+from melusine.conf import config
+
+__all__ = ["config"]
+
 VERSION = (3, 0, 0)
 __version__ = ".".join(map(str, VERSION))
 

@@ -3,13 +3,13 @@
     "age": 35,
     "attachment": "[]",
     "attachments": [],
-    "body": "\r\n\r\n\r\n\r\n ----- Transf\u00e9r\u00e9 par Conseiller le 24/05/2018 11:49 -----\r\n\r\n De :\tDupont <monsieurdupont@extensiona.com>\r\n A :\tconseiller@Societeimaginaire.fr\r\n Cc\u00a0:\tSociete@www.Societe.fr\r\n Date :\t24/05/2018 11:36\r\n Objet :\tDevis habitation\r\n\r\n\r\n\r\n Bonjour\r\n Je suis client chez vous\r\n Pouvez vous m \u00e9tablir un devis pour mon fils qui souhaite\r\n louer l\u2019appartement suivant :\r\n 25 rue du rueimaginaire 77000\r\n Merci\r\n Envoy\u00e9 de mon iPhone",
-    "date": "2019-03-27 17:34:12",
-    "from": "conseiller1@societeimaginaire.fr",
-    "header": "Tr : Devis habitation",
+    "body": "\n\nJe vous transferts cette demande urgente !\n\nKim Smith\nConseiller MAIF\n\n----- Transféré par Conseiller le 24/05/2018 11:49 -----\n\nDe : Dupont <dupont@societaire.com>\nA : conseiller@maif.fr\nCc : somebody@hotmail.fr\nDate : 22/02/2022 22:22\nObjet : Demande urgente\n\nBonjour\nJ'ai besoin d'une attestation scolaire pour mon enfant.\nPouvez-vous me l'envoyer rapidement s'il vous plait ?\nJe vous remercie par avance.\n\nClaude Dupont\n3 Rue de la victoire\n79000 Niort\ndupont@societaire.com\n\nEnvoyé de mon iPhone",
+    "date": "2022-02-22 22:22:22",
+    "from": "conseiller1@maif.fr",
+    "header": "Tr : Demande urgente",
     "label": "habitation",
     "sexe": "F",
-    "to": "demandes@societeimaginaire.fr"
+    "to": "mailbox@maif.fr"
   },
   {
     "age": 32,
