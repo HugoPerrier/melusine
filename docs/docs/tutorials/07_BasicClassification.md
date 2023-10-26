@@ -28,6 +28,11 @@ docs_src/BasicClassification/tutorial001.py:create_dataset
 --8<--
 ```
 
+|    | header                       | body                                                                               |
+|---:|:-----------------------------|:-----------------------------------------------------------------------------------|
+|  0 | Dossier 123456               | Merci beaucoup pour votre gentillesse et votre écoute !                            |
+|  1 | Réclamation (Dossier 987654) | Bonjour, je ne suis pas satisfait de cette situation, répondez-moi rapidement svp! |
+
 
 ## Classify with Zero-Shot-Classification
 
