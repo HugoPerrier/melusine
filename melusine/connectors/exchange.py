@@ -20,8 +20,7 @@ try:
     from exchangelib.errors import ErrorFolderNotFound  # noqa
 except ModuleNotFoundError:
     logger.exception(
-        "To use the Melusine ExchangeConnector, you need to install the exchangelib package"
-        "pip install exchangelib"
+        "To use the Melusine ExchangeConnector, you need to install the exchangelib package" "pip install exchangelib"
     )
     raise
 
@@ -93,14 +92,10 @@ class ExchangeConnector:
                 config=self.exchangelib_config,
                 **account_args,
             )
-            logger.info(
-                f"Address {self.sender_address} is set up to send emails."
-            )
+            logger.info(f"Address {self.sender_address} is set up to send emails.")
         else:
             self.sender_account = None
-            logger.info(
-                f"Sender address not specified, email sending is disabled."
-            )
+            logger.info(f"Sender address not specified, email sending is disabled.")
 
         # Setup correction folder and done folder
         self.routing_folder_path = routing_folder_path
@@ -274,9 +269,7 @@ class ExchangeConnector:
             if folder_name not in existing_folders:
                 f = Folder(parent=base_folder, name=folder_name)
                 f.save()
-                logger.info(
-                    f"Created subfolder {folder_name} in folder {base_folder_name}"
-                )
+                logger.info(f"Created subfolder {folder_name} in folder {base_folder_name}")
 
     def get_emails(
         self,
@@ -322,11 +315,7 @@ class ExchangeConnector:
             .order_by(order)[:max_emails]
         )
 
-        new_emails = [
-            self._extract_email_attributes(x)
-            for x in all_new_data
-            if isinstance(x, Message)
-        ]
+        new_emails = [self._extract_email_attributes(x) for x in all_new_data if isinstance(x, Message)]
         df_new_emails = pd.DataFrame(new_emails)
 
         logger.info(f"Read '{len(new_emails)}' new emails")
@@ -423,12 +412,8 @@ class ExchangeConnector:
 
             mask = classified_emails[target_column] == folder
             mids_to_move = classified_emails[mask][id_column]
-            items = self.mailbox_account.inbox.filter(message_id__in=mids_to_move).only(
-                "id", "changekey"
-            )
-            self.mailbox_account.bulk_move(
-                ids=items, to_folder=destination_folder, chunk_size=5
-            )
+            items = self.mailbox_account.inbox.filter(message_id__in=mids_to_move).only("id", "changekey")
+            self.mailbox_account.bulk_move(ids=items, to_folder=destination_folder, chunk_size=5)
             logger.info(f"Moving {mids_to_move.size} emails to folder '{folder}'")
 
     def get_corrections(
@@ -460,14 +445,10 @@ class ExchangeConnector:
                 "You need to set the class attribute `correction_folder_path` to use `get_corrections`."
             )
 
-        logger.info(
-            f"Reading corrected emails from folder and {self.correction_folder}"
-        )
+        logger.info(f"Reading corrected emails from folder and {self.correction_folder}")
 
         # Get correction folders
-        categories = [
-            e.name for e in self.correction_folder.children if e.name not in ignore_list
-        ]
+        categories = [e.name for e in self.correction_folder.children if e.name not in ignore_list]
 
         # Load corrected emails
         all_corrected_emails = list()
@@ -486,11 +467,7 @@ class ExchangeConnector:
                 )
                 .order_by("datetime_received")[:max_emails]
             )
-            emails = [
-                self._extract_email_attributes(m)
-                for m in messages
-                if isinstance(m, Message)
-            ]
+            emails = [self._extract_email_attributes(m) for m in messages if isinstance(m, Message)]
 
             # Add correction folder to email attributes
             for item in emails:
@@ -519,18 +496,12 @@ class ExchangeConnector:
                 "and the class attribute `correction_folder_path` to use `move_to_done`."
             )
         # Collect corrected emails
-        items = self.correction_folder.children.filter(message_id__in=emails_id).only(
-            "id", "changekey"
-        )
+        items = self.correction_folder.children.filter(message_id__in=emails_id).only("id", "changekey")
         n_items = items.count()
 
         # Move to done folder
-        self.mailbox_account.bulk_move(
-            ids=items, to_folder=self.done_folder, chunk_size=5
-        )
-        logger.info(
-            f"Moved {n_items} corrected emails to the folder {self.done_folder_path}"
-        )
+        self.mailbox_account.bulk_move(ids=items, to_folder=self.done_folder, chunk_size=5)
+        logger.info(f"Moved {n_items} corrected emails to the folder {self.done_folder_path}")
 
     def list_subfolders(self, base_folder_path: str = None):
         """
@@ -544,9 +515,7 @@ class ExchangeConnector:
         base_folder = self._get_mailbox_path(base_folder_path)
         return [f.name for f in base_folder.children]
 
-    def send_email(
-        self, to: Union[str, List[str]], header: str, body: str, attachments: dict
-    ):
+    def send_email(self, to: Union[str, List[str]], header: str, body: str, attachments: dict):
         """
         This method sends an email from the login address (attribute login_address).
 

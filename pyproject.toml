@@ -46,3 +46,6 @@ package-data = {"conf" = ["*.json", "*.yaml", "*.yml",], "data" = ["*.csv"]}
 [tool.setuptools.dynamic]
 version = {attr = "melusine.VERSION"}
 readme = {file = ["README.md"]}
+
+[tool.black]
+line-length = 120
