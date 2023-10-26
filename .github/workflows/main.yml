@@ -11,8 +11,8 @@ jobs:
           src: "./melusine"
 
   test:
+    name: Test
     needs: lint
-    name: "Test"
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -32,6 +32,10 @@ jobs:
         pip install tox tox-gh-actions
     - name: Test with tox
       run: tox
+    - name: Coverage Badge
+      uses: codecov/codecov-action@v3
+
+
 
   deploy:
     name: Deploy python package
