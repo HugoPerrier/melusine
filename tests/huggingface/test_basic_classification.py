@@ -58,6 +58,3 @@ def test_tutorial001(add_docs_to_pythonpath):
 
         df = run()
         assert isinstance(df, pd.DataFrame)
-
-def test_fake_test():
-    assert True is False

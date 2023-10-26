@@ -2,7 +2,16 @@ name: Build & Test
 on: push
 
 jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: psf/black@stable
+        with:
+          src: "./melusine"
+
   test:
+    needs: lint
     name: "Test"
     runs-on: ubuntu-latest
     strategy:
