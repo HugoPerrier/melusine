@@ -6,5 +6,5 @@ def test_show_versions():
     assert True
 
 
-def fake_test():
+def test_fake_test():
     assert True is False
