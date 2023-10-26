@@ -20,6 +20,7 @@ Implemented classes: [
 """
 from __future__ import annotations
 
+import arrow
 import logging
 import re
 import unicodedata
@@ -27,15 +28,8 @@ from abc import abstractmethod
 from re import Pattern
 from typing import Any, Dict, Iterable, List, Optional, Sequence, Set, Tuple, Union
 
-import arrow
-import gensim
-import pandas as pd
-from sklearn.exceptions import NotFittedError
 
 from melusine.base import MelusineDataset, MelusineTransformer
-
-# Module-wise logger
-# Question : if the module is big, should we have class-wise loggers ?
 from melusine.message import Message
 
 logger = logging.getLogger(__name__)
@@ -154,7 +148,7 @@ class Normalizer(MelusineTransformer):
             text = re.sub(r"<\n(\w)", r"<\1", text)
             text = re.sub(r"(\w)\n>", r"\1>", text)
 
-        # Replace non breaking spaces
+        # Replace non-breaking spaces
         text = text.replace("\xa0", " ")
 
         return text
@@ -263,77 +257,6 @@ class RegexTokenizer(MelusineTransformer):
         tokens = self._remove_stopwords(tokens)
 
         return tokens
-
-
-class Phraser(MelusineTransformer):
-    """
-    Class to phrase common collocations.
-        > Ex: new york => new_york
-    """
-
-    PHRASER_FILENAME = "gensim_phraser"
-
-    def __init__(
-        self,
-        input_columns: str = "tokens",
-        output_columns: str = "tokens",
-        phraser_args: Dict[str, Any] = None,
-        **kwargs: Any,
-    ):
-        super().__init__(
-            input_columns=input_columns,
-            output_columns=output_columns,
-            func=None,
-        )
-
-        self.kwargs = kwargs
-        self.phraser_args = phraser_args or dict()
-
-        # Phraser arguments can be passed as init keyword arguments as well
-        self.phraser_args.update(**kwargs)
-        self.phraser_: Union[Phraser, None] = None
-
-    def fit(self, df: pd.DataFrame, y: pd.Series = None) -> Phraser:
-        """
-        Method to fit the gensim phraser object on train data.
-
-        Parameters
-        ----------
-        df: pd.DataFrame
-            Input DataFrame
-        y: pd.Series
-            Unused
-        """
-
-        input_data = df[self.input_columns[0]]
-        phrases = gensim.models.Phrases(input_data, **self.phraser_args)
-        self.phraser_ = gensim.models.phrases.Phraser(phrases)
-
-        return self
-
-    def transform(self, df: MelusineDataset) -> MelusineDataset:
-        """
-        Method to apply the phraser transform on a dataset.
-
-        Parameters
-        ----------
-        df: pd.DataFrame
-            Input DataFrame
-
-        Returns
-        -------
-        _: pd.DataFrame
-            Output DataFrame
-        """
-        if self.phraser_ is None:
-            raise NotFittedError()
-
-        if isinstance(df, pd.DataFrame):
-            df[self.input_columns[0]] = self.phraser_[df[self.output_columns[0]]]
-        else:
-            raise NotImplementedError()
-
-        return df
 
 
 class BaseSegmenter(MelusineTransformer):

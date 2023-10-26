@@ -17,7 +17,6 @@ classifiers = [
 ]
 dependencies = [
     "arrow",
-    "gensim >= 4.1.2",
     "pandas>2",
     "scikit-learn>=1",
     "tqdm>=4.34",
@@ -34,6 +33,7 @@ dynamic = ["version", "readme"]
 dev = []
 test = ["pytest", "coverage"]
 misc = ["factory-boy"]
+transformers = ["transformers>4"]
 
 [tool.setuptools.packages.find]
 where = ["."]  # list of folders that contain the packages

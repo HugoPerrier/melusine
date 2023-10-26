@@ -17,12 +17,13 @@ nav:
     - history/history.md
   - Tutorials:
     - tutorials/00_GettingStarted.md
-    - tutorials/01_MelusinePipeline.md
-    - tutorials/02_MelusineTransformers.md
-    - tutorials/03_MelusineRegex.md
-    - tutorials/04_UsingModels.md
-    - tutorials/05_MelusineDetectors.md
-    - tutorials/06_Configurations.md
+#    - tutorials/01_MelusinePipeline.md
+#    - tutorials/02_MelusineTransformers.md
+#    - tutorials/03_MelusineRegex.md
+#    - tutorials/04_UsingModels.md
+#    - tutorials/05_MelusineDetectors.md
+#    - tutorials/06_Configurations.md
+    - tutorials/07_BasicClassification.md
   - Advanced Tutorials:
     - advanced/ContentTagger.md
     - advanced/CustomDetector.md
@@ -49,6 +50,7 @@ markdown_extensions:
     pygments_lang_class: true
   pymdownx.inlinehilite:
   pymdownx.snippets:
+    dedent_subsections: true
   pymdownx.superfences:
     custom_fences:
     - name: mermaid

@@ -13,6 +13,7 @@ Implemented classes: [
 """
 from __future__ import annotations
 
+import copy
 import inspect
 import json
 import logging
@@ -245,7 +246,7 @@ class BaseMelusineDetector(MelusineTransformer, ABC):
         data_ = backend.copy(df)
 
         # Get list of new columns created by the detector
-        return_cols = self.output_columns
+        return_cols = copy.deepcopy(self.output_columns)
 
         # Create debug data dict
         if debug_mode:

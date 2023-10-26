@@ -8,9 +8,3 @@ The `MelusinePipeline` class is at the core of melusine. It inherits from the `s
 
 ## Code
 
-
-[//]: # (```Python)
-
-[//]: # ({!../../src/melusine/docs/MelusinePipeline/tutorial001.py!})
-
-[//]: # (```)

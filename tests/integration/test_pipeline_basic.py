@@ -125,59 +125,6 @@ def test_pipeline_from_dict(dataframe_basic):
 
 
 @pytest.mark.usefixtures("use_test_config")
-def test_fit_pipeline(dataframe_basic):
-    """
-    Train a pipeline using transformers defined in a pipeline config file."""
-    import gensim
-
-    # Input data
-    df = dataframe_basic.copy()
-
-    # Phraser key
-    phraser_key = "test_phraser"
-
-    # Pipeline conf
-    pipeline_conf = {
-        "steps": [
-            {
-                "class_name": "Normalizer",
-                "module": "melusine.processors",
-                "config_key": "test_normalizer",
-            },
-            {
-                "class_name": "RegexTokenizer",
-                "module": "melusine.processors",
-                "config_key": "test_tokenizer",
-            },
-            {
-                "class_name": "Phraser",
-                "module": "melusine.processors",
-                "config_key": phraser_key,
-            },
-        ]
-    }
-    test_conf_dict = config.dict()
-    test_conf_dict["test_pipeline_with_fit"] = pipeline_conf
-    config.reset(config_dict=test_conf_dict)
-
-    # Create pipeline
-    pipeline_with_fit = MelusinePipeline.from_config(config_key="test_pipeline_with_fit", verbose=True)
-
-    # Fit the pipeline and transform the data
-    df_transformed = pipeline_with_fit.fit_transform(df)
-
-    # Make basic tests
-    assert isinstance(df_transformed, pd.DataFrame)
-
-    # Check if the fitted attributes exists
-    assert hasattr(pipeline_with_fit.named_steps[phraser_key], "phraser_")
-    fitted_attribute = pipeline_with_fit.named_steps[phraser_key].phraser_
-
-    # Check that the fitted phraser has the right type (not None)
-    assert isinstance(fitted_attribute, gensim.models.phrases.Phraser)
-
-
-@pytest.mark.usefixtures("use_test_config")
 def test_missing_config_key():
     """
     Train a pipeline using transformers defined in a pipeline config file.

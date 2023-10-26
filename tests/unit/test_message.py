@@ -98,25 +98,82 @@ def test_message_extract_last_body():
     assert message.extract_last_body() == [("BODY", "Pouvez-vous")]
 
 
-def test_format_tags():
-    message = Message(text="Hello")
+def test_str():
+    # Arrange
+    message = Message(meta="Test\nmeta", text="Hello")
     message.tags = [
-        ("TAG", "ABCDE"),
-        ("TAAAG", "ABCDE"),
         ("TAG", "ABC"),
+        ("TAAG", "ABCD"),
+        ("TAAAG", "ABCDE"),
     ]
 
-    expected = "ABCDE............TAG\n" "ABCDE..........TAAAG\n" "ABC..............TAG\n"
+    expected_list = [
+        r"=+ +Message +=+",
+        r"-+ +Meta +-+",
+        r"Test",
+        r"meta",
+        r"-+ +Text +-+",
+        r"ABC\.+TAG",
+        r"ABCD\.+TAAG",
+        r"ABCDE\.+TAAAG",
+        r"=+",
+    ]
 
-    result = message.format_tags(total_length=20, tag_name_length=10)
+    # Act
+    result = str(message).strip()
 
-    assert result == expected
+    # Assert
+    assert len(result.splitlines()) == len(expected_list)
+    for text_line, regex in zip(result.splitlines(), expected_list):
+        assert re.match(regex, text_line)
 
 
-def test_format_tags_no_tags():
+def test_str_no_meta():
+    # Arrange
+    message = Message(text="Hello")
+    message.tags = [
+        ("TAG", "ABC"),
+        ("TAAG", "ABCD"),
+        ("TAAAG", "ABCDE"),
+    ]
+
+    expected_list = [
+        r"=+ +Message +=+",
+        r"-+ +Meta +-+",
+        r"N/A",
+        r"-+ +Text +-+",
+        r"ABC\.+TAG",
+        r"ABCD\.+TAAG",
+        r"ABCDE\.+TAAAG",
+        r"=+",
+    ]
+
+    # Act
+    result = str(message).strip()
+
+    # Assert
+    assert len(result.splitlines()) == len(expected_list)
+    for text_line, regex in zip(result.splitlines(), expected_list):
+        assert re.match(regex, text_line)
+
+
+def test_str_no_tags():
+    # Arrange
     message = Message(text="Hello")
 
-    expected = ""
-    result = message.format_tags(total_length=20, tag_name_length=10)
+    expected_list = [
+        r"=+ +Message +=+",
+        r"-+ +Meta +-+",
+        r"N/A",
+        r"-+ +Text +-+",
+        r"Hello",
+        r"=+",
+    ]
 
-    assert result == expected
+    # Act
+    result = str(message).strip()
+
+    # Assert
+    assert len(result.splitlines()) == len(expected_list)
+    for text_line, regex in zip(result.splitlines(), expected_list):
+        assert re.match(regex, text_line)

@@ -164,14 +164,14 @@ class Message:
             _: Pretty formatted representation of the tags and texts.
         """
         if self.tags is None:
-            return ""
+            return self.text
+        else:
+            tag_text_length = total_length - tag_name_length
+            text = ""
+            for tag_name, tag_text in self.tags:
+                text += tag_text.ljust(tag_text_length, ".") + tag_name.rjust(tag_name_length, ".") + "\n"
 
-        tag_text_length = total_length - tag_name_length
-        text = ""
-        for tag_name, tag_text in self.tags:
-            text += tag_text.ljust(tag_text_length, ".") + tag_name.rjust(tag_name_length, ".") + "\n"
-
-        return text
+        return text.strip()
 
     def __repr__(self) -> str:
         """
@@ -188,3 +188,22 @@ class Message:
             meta = "NA"
         text: str = re.sub(r"\n+", r"\n", self.text)
         return f"Message(meta={repr(meta)}, text={repr(text)})"
+
+    def __str__(self) -> str:
+        """
+        Repr representation.
+
+        Returns
+        -------
+        _: str
+            Readable representation of the Message.
+        """
+        text = ""
+        text += f"{'='*33}{'Message':^22}{'='*33}\n"
+        text += f"{'-'*33}{'Meta':^22}{'-'*33}\n"
+        text += f"{self.meta or 'N/A'}\n"
+        text += f"{'-'*33}{'Text':^22}{'-'*33}\n"
+        text += self.format_tags() + "\n"
+        text += f"{'='*33}{'=' * 22}{'='*33}\n\n"
+
+        return text

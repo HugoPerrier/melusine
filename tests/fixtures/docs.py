@@ -1,8 +1,8 @@
+import pytest
 import sys
 from pathlib import Path
-from typing import Any, List
+from typing import Any, List, Generator
 
-import pytest
 
 # Package source root
 docs_folder = Path(__file__).parents[2] / "docs"
@@ -38,5 +38,12 @@ def get_tutorial_modules() -> List[str]:
 def melusine_tutorial(request: Any) -> str:
     """Parametrized fixture for tutorials in the folder to test"""
     # Add docs to python path
-    sys.path.insert(0, str(docs_folder))
     return request.param
+
+
+@pytest.fixture
+def add_docs_to_pythonpath() -> Generator[None, None, None]:
+    """Parametrized fixture for tutorials in the folder to test"""
+    # Add docs to python path
+    sys.path.insert(0, str(docs_folder))
+    yield None

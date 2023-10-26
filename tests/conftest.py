@@ -40,24 +40,7 @@ def df_emails():
     return df_emails
 
 
-@pytest.fixture(scope="session")
-def w2v(df_emails):
-    from gensim.models import Word2Vec
-
-    vector_size = 50
-    min_count = 2
-    epochs = 2
-
-    w2v = Word2Vec(vector_size=vector_size, min_count=min_count)
-    w2v.build_vocab(df_emails["tokens"])
-    w2v.train(df_emails["tokens"], total_examples=w2v.corpus_count, epochs=epochs)
-
-    return w2v
-
-
 # =============== Fixtures with "function" scope ===============
-
-
 @pytest.fixture(scope="function")
 def reset_melusine_config():
     """

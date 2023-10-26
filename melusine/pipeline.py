@@ -147,7 +147,6 @@ class MelusinePipeline(Pipeline):
         verbose: bool
             Verbose mode.
         """
-        IoMixin.__init__(self)
         Pipeline.__init__(self, steps=steps, memory=memory, verbose=verbose)
 
         self.memory = memory
