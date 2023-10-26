@@ -32,10 +32,14 @@ jobs:
         pip install tox tox-gh-actions
     - name: Test with tox
       run: tox
-    - name: Coverage Badge
-      uses: codecov/codecov-action@v3
 
-
+  coverage:
+    name: Create coverage badge
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Coverage Badge
+        uses: codecov/codecov-action@v3
 
   deploy:
     name: Deploy python package
