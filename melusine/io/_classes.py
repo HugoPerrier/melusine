@@ -23,14 +23,8 @@ class InitError(Exception):
 
 class IoMixin:
     """
-    Base class of most Melusine objects.
-    Defines generic save/load methods.
+    Defines generic load methods.
     """
-
-    # JSON save params
-    JSON_SUFFIX: str = ".json"
-    SORT_KEYS: bool = True
-    INDENT: int = 4
 
     def __init__(self, **kwargs: Any):
         """Initialize attribute."""

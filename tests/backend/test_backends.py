@@ -85,6 +85,14 @@ def test_dict_backend(backend_base_data, backend_testcase):
         assert data_dict_transform == expected_data_dict
 
 
+def test_dict_backend_impossible_situation():
+    backend = DictBackend()
+    with pytest.raises(ValueError):
+        data_dict_transform = backend.apply_transform(
+            data={"a": 0}, func=lambda x: x + 1, input_columns=["int_col"], output_columns=None
+        )
+
+
 @pytest.mark.parametrize("progress_bar", [False, True])
 def test_pandas_backend(backend_base_data, backend_testcase, progress_bar):
     """Test"""

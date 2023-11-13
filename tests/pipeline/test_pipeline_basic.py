@@ -1,14 +1,11 @@
 """
 Example script to fit a minimal preprocessing pipeline
 """
-from tempfile import TemporaryDirectory
-
 import pandas as pd
 import pytest
-from pydantic import ValidationError
 
 from melusine.conf import config
-from melusine.pipeline import MelusinePipeline
+from melusine.pipeline import MelusinePipeline, PipelineConfigurationError
 from melusine.processors import Normalizer, RegexTokenizer
 
 
@@ -154,7 +151,7 @@ def test_missing_config_key():
     }
 
     # Create pipeline from a json config file (using config key "my_pipeline")
-    with pytest.raises(ValidationError):
+    with pytest.raises(PipelineConfigurationError):
         _ = MelusinePipeline.from_config(config_dict=conf_pipeline_basic, verbose=True)
 
 
@@ -176,6 +173,8 @@ def test_invalid_config_key():
             {
                 "class_name": "RegexTokenizer",
                 "module": "melusine.processors",
+                "name": "test_name",
+                "parameters": {"test_key": "test_value"},
             },
         ]
     }
@@ -186,63 +185,88 @@ def test_invalid_config_key():
 
 
 @pytest.mark.usefixtures("use_test_config")
-def test_missing_name():
+@pytest.mark.parametrize(
+    "pipeline_conf",
+    [
+        pytest.param(
+            {
+                "NOT_STEPS": [
+                    {
+                        "class_name": "Normalizer",
+                        "module": "test_module",
+                        "config_key": "test_key",
+                    },
+                ]
+            },
+            id="Missing steps key"
+        ),
+        pytest.param(
+            {
+                "steps": [
+                    {
+                        "class_name": "Normalizer",
+                        "config_key": "test_key",
+                    },
+                ]
+            },
+            id="Missing module key"
+        ),
+        pytest.param(
+            {
+                "steps": [
+                    {
+                        "class_name": "Normalizer",
+                        "config_key": "test_key",
+                        "name": "test_name",
+                    },
+                ]
+            },
+            id="Missing parameters key"
+        ),
+        pytest.param(
+            {
+                "steps": [
+                    {
+                        "class_name": "Normalizer",
+                        "module": "test_module",
+                        "name": "test_name",
+                        "parameters": "THIS SHOULD BE A DICT",
+                    },
+                ]
+            },
+            id="Erroneous parameters type"
+        ),
+        pytest.param(
+            {
+                "steps": [
+                    {
+                        "class_name": "Normalizer",
+                        "module": "melusine.processors",
+                        "parameters": {
+                            "form": "NFKD",
+                            "input_columns": ["text"],
+                            "lowercase": True,
+                            "output_columns": ["text"],
+                        },
+                    },
+                    {
+                        "class_name": "RegexTokenizer",
+                        "module": "melusine.processors",
+                        "config_key": "test_tokenizer",
+                    },
+                ]
+            },
+            id="Missing name key"
+        ),
+    ]
+)
+def test_pipeline_config_error(pipeline_conf):
     """
     Train a pipeline using transformers defined in a pipeline config file.
     """
-    # Pipeline configuration
-    conf_pipeline_basic = {
-        "steps": [
-            {
-                "class_name": "Normalizer",
-                "module": "melusine.processors",
-                "parameters": {
-                    "form": "NFKD",
-                    "input_columns": ["text"],
-                    "lowercase": True,
-                    "output_columns": ["text"],
-                },
-            },
-            {
-                "class_name": "RegexTokenizer",
-                "module": "melusine.processors",
-                "config_key": "test_tokenizer",
-            },
-        ]
-    }
-
     # Create pipeline from a json config file (using config key "my_pipeline")
-    with pytest.raises(ValidationError):
-        _ = MelusinePipeline.from_config(config_dict=conf_pipeline_basic, verbose=True)
-
-
-@pytest.mark.usefixtures("use_test_config")
-def test_missing_parameters():
-    """
-    Train a pipeline using transformers defined in a pipeline config file.
-    """
-    # Set config keys
-    normalizer_name = "normalizer"
-
-    # Pipeline configuration
-    conf_pipeline_basic = {
-        "steps": [
-            {
-                "name": normalizer_name,
-                "class_name": "Normalizer",
-                "module": "melusine.processors",
-            },
-            {
-                "class_name": "RegexTokenizer",
-                "module": "melusine.processors",
-                "config_key": "test_tokenizer",
-            },
-        ]
-    }
-
-    # Create pipeline from a json config file (using config key "my_pipeline")
-    with pytest.raises(ValidationError):
-        _ = MelusinePipeline.from_config(config_dict=conf_pipeline_basic, verbose=True)
+    with pytest.raises(PipelineConfigurationError):
+        _ = MelusinePipeline.from_config(config_dict=pipeline_conf)
 
 
 def test_missing_input_field(dataframe_basic):

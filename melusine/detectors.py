@@ -132,7 +132,7 @@ class ThanksDetector(MelusineDetector):
 
         text: str = row[self.THANKS_TEXT_COL]
 
-        detection_data = self.thanks_regex.match(text)
+        detection_data = self.thanks_regex(text)
         detection_result = detection_data[self.thanks_regex.MATCH_RESULT]
 
         # Save debug data
@@ -267,7 +267,7 @@ class VacationReplyDetector(MelusineDetector):
 
         text: str = row[self.CONST_TEXT_COL_NAME]
 
-        detection_data = self.vacation_reply_regex.match(text)
+        detection_data = self.vacation_reply_regex(text)
         detection_result = detection_data[self.vacation_reply_regex.MATCH_RESULT]
 
         # Save debug data
@@ -393,7 +393,7 @@ class ReplyDetector(MelusineDetector):
 
         text: str = row[self.CONST_ANALYSED_TEXT_COL]
 
-        detection_data = self.reply_regex.match(text)
+        detection_data = self.reply_regex(text)
         detection_result = detection_data[MelusineRegex.MATCH_RESULT]
 
         # Save debug data
@@ -524,7 +524,7 @@ class TransferDetector(MelusineDetector):
         text: str = row[self.CONST_ANALYSED_TEXT_COL]
         meta: str = row[self.messages_column][0].meta
 
-        detection_data = self.transfer_regex.match(text)
+        detection_data = self.transfer_regex(text)
         detection_result = detection_data[MelusineRegex.MATCH_RESULT]
 
         # Save debug data
@@ -652,7 +652,7 @@ class EmergencyDetector(MelusineDetector):
 
         text: str = row[self.CONST_TEXT_COL_NAME]
 
-        detection_data = self.regex.match(text)
+        detection_data = self.regex(text)
         detection_result = detection_data[self.regex.MATCH_RESULT]
 
         # Save debug data

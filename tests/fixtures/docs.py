@@ -1,8 +1,8 @@
-import pytest
 import sys
 from pathlib import Path
-from typing import Any, List, Generator
+from typing import Any, Generator, List
 
+import pytest
 
 # Package source root
 docs_folder = Path(__file__).parents[2] / "docs"
@@ -26,7 +26,8 @@ def get_tutorial_modules() -> List[str]:
     # Convert file path (path/to/module.py) to module path (path.to.module)
     module_list = [
         str(tutorial_file.relative_to(docs_folder)).replace(".py", "").replace("/", ".")
-        for tutorial_file in tutorial_list if "__init__" not in str(tutorial_file)
+        for tutorial_file in tutorial_list
+        if "__init__" not in str(tutorial_file)
     ]
 
     return module_list

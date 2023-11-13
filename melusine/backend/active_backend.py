@@ -155,22 +155,6 @@ class ActiveBackend(BaseTransformerBackend):
         """
         return self._backend.add_fields(left=left, right=right, fields=fields)
 
-    def get_attribute(self, attribute_name: str) -> Any:
-        """
-        Method to get attributes of backend.
-
-        Parameters
-        ----------
-        attribute_name: str
-            Name of the desired attribute
-
-        Returns
-        -------
-        _: Any
-            Value of the desired attribute
-        """
-        return getattr(self._backend, attribute_name, None)
-
     def check_debug_flag(self, data: Any) -> bool:
         """
         Method to check if debug_mode is activated.

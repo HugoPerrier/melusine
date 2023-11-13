@@ -5,7 +5,7 @@
 [![Generic badge](https://img.shields.io/badge/python-3.7|3.8-blue.svg)](https://shields.io/)
 
 🎉 We just released **Melusine 2.3.6** including uncertainty estimations using TensorFlow Probability.
-Checkout this [tutorial](https://github.com/MAIF/melusine/blob/master/tutorial/tutorial15_probabilistic_models.ipynb) 
+Checkout this [tutorial](https://github.com/MAIF/melusine/blob/master/tutorial/tutorial15_probabilistic_models.ipynb)
 to learn more. We are grateful to those who contribute and make this library alive!  
 All new features can be found in the **full pipeline [tutorial](https://github.com/MAIF/melusine/blob/master/tutorial/tutorial08_full_pipeline_detailed.ipynb)**. 🎉
 
@@ -103,37 +103,47 @@ A working pre-processing pipeline is given below:
 ```python
 from sklearn.pipeline import Pipeline
 from melusine.utils.transformer_scheduler import TransformerScheduler
-from melusine.prepare_email.manage_transfer_reply import check_mail_begin_by_transfer, update_info_for_transfer_mail, add_boolean_transfer, add_boolean_answer
+from melusine.prepare_email.manage_transfer_reply import (
+    check_mail_begin_by_transfer,
+    update_info_for_transfer_mail,
+    add_boolean_transfer,
+    add_boolean_answer,
+)
 from melusine.prepare_email.build_historic import build_historic
 from melusine.prepare_email.mail_segmenting import structure_email
 from melusine.prepare_email.body_header_extraction import extract_last_body
 from melusine.prepare_email.cleaning import clean_body
 
 ManageTransferReply = TransformerScheduler(
-functions_scheduler=[
-    (check_mail_begin_by_transfer, None, ['is_begin_by_transfer']),
-    (update_info_for_transfer_mail, None, None),
-    (add_boolean_answer, None, ['is_answer']),
-    (add_boolean_transfer, None, ['is_transfer'])
-])
+    functions_scheduler=[
+        (check_mail_begin_by_transfer, None, ["is_begin_by_transfer"]),
+        (update_info_for_transfer_mail, None, None),
+        (add_boolean_answer, None, ["is_answer"]),
+        (add_boolean_transfer, None, ["is_transfer"]),
+    ]
+)
 
 EmailSegmenting = TransformerScheduler(
-functions_scheduler=[
-    (build_historic, None, ['structured_historic']),
-    (structure_email, None, ['structured_body'])
-])
+    functions_scheduler=[
+        (build_historic, None, ["structured_historic"]),
+        (structure_email, None, ["structured_body"]),
+    ]
+)
 
 Cleaning = TransformerScheduler(
-functions_scheduler=[
-    (extract_last_body, None, ['last_body']),
-    (clean_body, None, ['clean_body'])
-])
+    functions_scheduler=[
+        (extract_last_body, None, ["last_body"]),
+        (clean_body, None, ["clean_body"]),
+    ]
+)
 
-prepare_data_pipeline = Pipeline([
-  ('ManageTransferReply', ManageTransferReply),
-  ('EmailSegmenting', EmailSegmenting),
-  ('Cleaning', Cleaning),
-])
+prepare_data_pipeline = Pipeline(
+    [
+        ("ManageTransferReply", ManageTransferReply),
+        ("EmailSegmenting", EmailSegmenting),
+        ("Cleaning", Cleaning),
+    ]
+)
 
 df_email = prepare_data_pipeline.fit_transform(df_email)
 ```
@@ -155,14 +165,11 @@ A pipeline to train and apply the phraser end tokenizer is given below:
 from melusine.nlp_tools.phraser import Phraser
 from melusine.nlp_tools.tokenizer import Tokenizer
 
-tokenizer = Tokenizer (input_column='clean_body', output_column="tokens")
+tokenizer = Tokenizer(input_column="clean_body", output_column="tokens")
 df_email = tokenizer.fit_transform(df_email)
 
 phraser = Phraser(
-    input_column='tokens',
-    output_column='phrased_tokens',
-    threshold=5,
-    min_count=2
+    input_column="tokens", output_column="phrased_tokens", threshold=5, min_count=2
 )
 _ = phraser.fit(df_email)
 df_email = phraser.transform(df_email)
@@ -175,12 +182,7 @@ An example of embedding training is given below:
 ```python
 from melusine.nlp_tools.embedding import Embedding
 
-embedding = Embedding(
-    tokens_column='tokens',
-    size=300,
-    workers=4,
-    min_count=3
-)
+embedding = Embedding(tokens_column="tokens", size=300, workers=4, min_count=3)
 embedding.train(df_email)
 ```
 
@@ -189,13 +191,19 @@ embedding.train(df_email)
 A pipeline to prepare the metadata is given below:
 
 ```python
-from melusine.prepare_email.metadata_engineering import MetaExtension, MetaDate, Dummifier
+from melusine.prepare_email.metadata_engineering import (
+    MetaExtension,
+    MetaDate,
+    Dummifier,
+)
 
-metadata_pipeline = Pipeline([
-  ('MetaExtension', MetaExtension()),
-  ('MetaDate', MetaDate()),
-  ('Dummifier', Dummifier())
-])
+metadata_pipeline = Pipeline(
+    [
+        ("MetaExtension", MetaExtension()),
+        ("MetaDate", MetaDate()),
+        ("Dummifier", Dummifier()),
+    ]
+)
 
 df_meta = metadata_pipeline.fit_transform(df_email)
 ```
@@ -221,7 +229,7 @@ from melusine.nlp_tools.embedding import Embedding
 from melusine.models.neural_architectures import cnn_model
 from melusine.models.train import NeuralModel
 
-X = df_email.drop(['label'], axis=1)
+X = df_email.drop(["label"], axis=1)
 y = df_email.label
 
 le = LabelEncoder()
@@ -229,9 +237,11 @@ y = le.fit_transform(y)
 
 pretrained_embedding = embedding
 
-nn_model = NeuralModel(architecture_function=cnn_model,
-                       pretrained_embedding=pretrained_embedding,
-                       text_input_column='clean_body')
+nn_model = NeuralModel(
+    architecture_function=cnn_model,
+    pretrained_embedding=pretrained_embedding,
+    text_input_column="clean_body",
+)
 nn_model.fit(X, y, tensorboard_log_dir="./data")
 y_res = nn_model.predict(X)
 ```
@@ -303,7 +313,7 @@ Each messages of an email are segmented in the **structured_body** columns and e
 ### Dashboard App
 
 Melusine also offered an easy and nice dashboard app with StreamLit.
-The App contains exploratory dashboard on the email dataset and more specific study on discrimination between the dataset 
+The App contains exploratory dashboard on the email dataset and more specific study on discrimination between the dataset
 and a neural model classification.
 
 To run the app, run the following command in your terminal in the melusine/data directory :

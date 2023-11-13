@@ -156,11 +156,11 @@ class PandasBackend(BaseTransformerBackend):
         elif len(output_columns) == 1:
             expand = None
             new_cols = output_columns[0]
-        elif len(output_columns) > 1:
+        # Multiple output columns
+        else:
             expand = "expand"
             new_cols = list(output_columns)
-        else:
-            raise ValueError()
+
         return expand, new_cols
 
     def apply_transform_multiprocessing(

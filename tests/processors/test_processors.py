@@ -33,6 +33,20 @@ def test_normalizer(input_text, lowercase, output_text):
     text = normalizer.normalize_text(input_text)
     assert text == output_text
 
+    assert normalizer.normalize_text(1.25) == ""
+
+
+def test_normalizer_messages():
+    """Unit test"""
+
+    message_1 = Message(meta="", text="Héllö WORLD")
+    message_2 = Message(meta="abcd", text="Héllö heLLo")
+    normalizer = Normalizer(lowercase=True, input_columns="messages")
+    message_list = normalizer.normalize_message([message_1, message_2])
+
+    assert message_list[0].clean_text == "hello world"
+    assert message_list[1].clean_text == "hello hello"
+
 
 @pytest.mark.parametrize(
     "input_text, output_tokens, lowercase, normalization_form",
@@ -146,6 +160,12 @@ def test_segmenter(input_text, expected_messages):
             ],
             "Merci",
         ),
+        (
+            [
+                Message(meta="", text="Merci", tags=[("THANKS", "Merci")]),
+            ],
+            "Merci",
+        ),
     ],
 )
 def test_text_extractor(input_message_list, expected_text):
@@ -154,6 +174,12 @@ def test_text_extractor(input_message_list, expected_text):
     extractor = TextExtractor(output_columns="text", n_messages=1)
     result = extractor.extract(input_message_list)
     assert result == expected_text
+
+
+def test_text_extractor_error():
+    """Unit test"""
+    with pytest.raises(ValueError):
+        _ = TextExtractor(output_columns="text", n_messages=1, include_tags=["A"], exclude_tags=["B"])
 
 
 def test_text_extractor_multiple_messages():
@@ -287,7 +313,7 @@ def test_date_processor_instanciation():
     ],
 )
 def test_date_processor(date_str: str, expected_iso_format: str) -> None:
-    """Simple unit tests"""
+    """Simple base tests"""
     date_processor = DateProcessor()
     date_iso_format: str = date_processor.parse_date_to_iso(date_str)
 

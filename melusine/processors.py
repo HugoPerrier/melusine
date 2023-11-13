@@ -20,7 +20,6 @@ Implemented classes: [
 """
 from __future__ import annotations
 
-import arrow
 import logging
 import re
 import unicodedata
@@ -28,6 +27,7 @@ from abc import abstractmethod
 from re import Pattern
 from typing import Any, Dict, Iterable, List, Optional, Sequence, Set, Tuple, Union
 
+import arrow
 
 from melusine.base import MelusineDataset, MelusineTransformer
 from melusine.message import Message
@@ -208,10 +208,8 @@ class RegexTokenizer(MelusineTransformer):
         tokens: Sequence[str]
             List of tokens
         """
-        if isinstance(text, str):
-            tokens = re.findall(self.tokenizer_regex, text, re.M + re.DOTALL)
-        else:
-            tokens = []
+        tokens = re.findall(self.tokenizer_regex, text, re.M + re.DOTALL)
+
         return tokens
 
     def _remove_stopwords(self, tokens: Sequence[str]) -> Sequence[str]:
@@ -250,6 +248,7 @@ class RegexTokenizer(MelusineTransformer):
 
         if self.normalization_form:
             text = unicodedata.normalize(self.normalization_form, text).encode("ASCII", "ignore").decode("utf-8")
+
         # Text splitting
         tokens = self._text_to_tokens(text)
 
@@ -347,9 +346,6 @@ class BaseSegmenter(MelusineTransformer):
         -------
         _: List[Message]
         """
-        if not match_list:
-            return [Message(text="")]
-
         # Create first message meta based on email meta
         first_message_meta = ""
 
@@ -997,7 +993,7 @@ class BaseContentTagger(MelusineTransformer):
 
         return [p.strip() for p in clean_parts if self.validate_part(p)]
 
-    def validate_part(self, text: Optional[str]) -> bool:
+    def validate_part(self, text: str) -> bool:
         """
         Method to validate a text part.
         By default, check that it contains at least one of:
@@ -1007,24 +1003,20 @@ class BaseContentTagger(MelusineTransformer):
 
         Parameters
         ----------
-        text: Optional[str]
-            Text part to be validated
+        text: Text part to be validated
 
         Returns
         -------
         _: bool
             True if text part is valid
         """
-        if text is None:
-            return False
-
         return bool(re.search(self.valid_part_regex, text, flags=re.I))
 
     @staticmethod
     def clean_up_after_split(parts: List[Union[str, None]]) -> List[str]:
         """
         Clean up sentences after splitting.
-        Typically put punctuation back at the end of sentences.
+        Typically, put punctuation back at the end of sentences.
 
         Parameters
         ----------

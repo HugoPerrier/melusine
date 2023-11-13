@@ -1,10 +1,8 @@
 import re
-from tempfile import TemporaryDirectory
-
 import pytest
 
 from melusine.message import Message
-from melusine.processors import ContentTagger, Tag
+from melusine.processors import ContentTagger, Tag, BaseContentTagger
 
 
 def test_content_tagger():
@@ -530,6 +528,22 @@ def test_compiled_pattern():
     assert tag == "TEST_TAG"
 
 
+def test_str_pattern():
+    class MyClass(ContentTagger):
+        """Test class"""
+
+        @Tag
+        def TEST_TAG(self):
+            """Test method"""
+            return r"cool_pattern"
+
+    tagger = MyClass()
+    subtext, tag, match = tagger("cool_pattern is what I am looking for")[0]
+
+    # Check tag result
+    assert tag == "TEST_TAG"
+
+
 def test_malformed_regex():
     from melusine.processors import Tag
 
@@ -563,3 +577,32 @@ def test_call_method():
     subtext, tag, regex = match_list[0]
 
     assert tag == "HELLO"
+
+
+@pytest.mark.parametrize(
+    "text, n_words, word_character_only, expected_match",
+    [
+        pytest.param(
+            "Hello you", 4, False, True,
+            id="4 words match"
+        ),
+        pytest.param(
+            "Hello how are you today", 4, False, False,
+            id="4 words no match"
+        ),
+        pytest.param(
+            "Hello! you?", 4, False, True,
+            id="4 words match with special characters"
+        ),
+        pytest.param(
+            "Hello! you?", 4, True, False,
+            id="4 words match with special characters (word character only True)"
+        ),
+    ]
+)
+def test_word_blocks(text, n_words, word_character_only, expected_match):
+    regex = BaseContentTagger.word_block(n_words, word_character_only=word_character_only)
+
+    search_regex = r"^" + regex + r"$"
+    match = bool(re.search(search_regex, text))
+    assert match == expected_match

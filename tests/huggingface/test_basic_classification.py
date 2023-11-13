@@ -1,9 +1,12 @@
+from unittest.mock import patch
+
 import pandas as pd
 import pytest
-from unittest.mock import patch
+
 transformers = pytest.importorskip("transformers")
-from transformers.pipelines.zero_shot_classification import ZeroShotClassificationPipeline
 from typing import List
+
+from transformers.pipelines.zero_shot_classification import ZeroShotClassificationPipeline
 
 
 class MockZeroShotClassificationPipeline(ZeroShotClassificationPipeline):
@@ -23,7 +26,7 @@ class MockZeroShotClassificationPipeline(ZeroShotClassificationPipeline):
                     "sequence": sequences[1],
                     "labels": ["négatif", "positif"],
                     "scores": [0.5, 0.5],
-                }
+                },
             ]
 
         if "gentillesse" in sequences:
@@ -50,8 +53,8 @@ def test_tutorial001(add_docs_to_pythonpath):
     from docs_src.BasicClassification.tutorial001 import run, transformers_standalone
 
     with patch(
-            "docs_src.BasicClassification.tutorial001.pipeline",
-            new=MockZeroShotClassificationPipeline,
+        "docs_src.BasicClassification.tutorial001.pipeline",
+        new=MockZeroShotClassificationPipeline,
     ):
         result = transformers_standalone()
         assert isinstance(result, List)

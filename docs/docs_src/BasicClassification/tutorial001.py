@@ -1,27 +1,29 @@
-from transformers import pipeline
-from melusine.base import MelusineDetector
 from typing import List
 
 # --8<-- [start:create_dataset]
 import pandas as pd
+from transformers import pipeline
+
+from melusine.base import MelusineDetector
 
 
 def create_dataset():
-    df = pd.DataFrame([
-        {
-            "header": "Dossier 123456",
-            "body": "Merci beaucoup pour votre gentillesse et votre écoute !",
-        },
-        {
-            "header": "Réclamation (Dossier 987654)",
-            "body": (
-                "Bonjour, je ne suis pas satisfait de cette situation, "
-                "répondez-moi rapidement svp!"
-            ),
-        },
-    ])
+    df = pd.DataFrame(
+        [
+            {
+                "header": "Dossier 123456",
+                "body": "Merci beaucoup pour votre gentillesse et votre écoute !",
+            },
+            {
+                "header": "Réclamation (Dossier 987654)",
+                "body": ("Bonjour, je ne suis pas satisfait de cette situation, " "répondez-moi rapidement svp!"),
+            },
+        ]
+    )
 
     return df
+
+
 # --8<-- [end:create_dataset]
 
 
@@ -35,16 +37,10 @@ def transformers_standalone():
         "Ce film est une catastrophe, je suis en colère",
     ]
 
-    classifier = pipeline(
-        task='zero-shot-classification',
-        model=model_name_or_path,
-        tokenizer=model_name_or_path
-    )
+    classifier = pipeline(task="zero-shot-classification", model=model_name_or_path, tokenizer=model_name_or_path)
 
     result = classifier(
-        sequences=sentences,
-        candidate_labels=", ".join(["positif", "négatif"]),
-        hypothesis_template="Ce texte est {}."
+        sequences=sentences, candidate_labels=", ".join(["positif", "négatif"]), hypothesis_template="Ce texte est {}."
     )
     # --8<-- [end:transformers]
 
@@ -56,6 +52,7 @@ class DissatisfactionDetector(MelusineDetector):
     """
     Detect if the text expresses dissatisfaction.
     """
+
     # Dataframe column names
     OUTPUT_RESULT_COLUMN = "dissatisfaction_result"
     TMP_DETECTION_INPUT_COLUMN = "detection_input"
@@ -70,16 +67,10 @@ class DissatisfactionDetector(MelusineDetector):
         self.text_columns = text_columns
         self.threshold = threshold
         self.classifier = pipeline(
-            task='zero-shot-classification',
-            model=model_name_or_path,
-            tokenizer=model_name_or_path
+            task="zero-shot-classification", model=model_name_or_path, tokenizer=model_name_or_path
         )
 
-        super().__init__(
-            input_columns=text_columns,
-            output_columns=[self.OUTPUT_RESULT_COLUMN],
-            name="dissatisfaction"
-        )
+        super().__init__(input_columns=text_columns, output_columns=[self.OUTPUT_RESULT_COLUMN], name="dissatisfaction")
         # --8<-- [end:detector_init]
 
     # --8<-- [start:pre_detect]
@@ -103,7 +94,7 @@ class DissatisfactionDetector(MelusineDetector):
         pipeline_result = self.classifier(
             sequences=row[self.TMP_DETECTION_INPUT_COLUMN],
             candidate_labels=", ".join([self.POSITIVE_LABEL, self.NEGATIVE_LABEL]),
-            hypothesis_template=self.HYPOTHESIS_TEMPLATE
+            hypothesis_template=self.HYPOTHESIS_TEMPLATE,
         )
         # Format classification result
         result_dict = dict(zip(pipeline_result["labels"], pipeline_result["scores"]))
@@ -125,6 +116,7 @@ class DissatisfactionDetector(MelusineDetector):
             row[self.OUTPUT_RESULT_COLUMN] = False
 
         return row
+
     # --8<-- [end:post_detect]
 
 
@@ -140,8 +132,14 @@ def run():
 
     df = detector.transform(df)
     # --8<-- [end:run]
+
+    # Debug mode
+    df = create_dataset()
+    df.debug = True
+    _ = detector.transform(df)
+
     return df
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma no cover
     run()

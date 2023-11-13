@@ -7,9 +7,8 @@ from __future__ import annotations
 
 import copy
 import importlib
-from typing import Dict, Iterable, List, Optional, Set, Tuple, TypeVar, cast
+from typing import Dict, Iterable, List, Optional, Set, Tuple, TypeVar
 
-from pydantic import BaseModel, root_validator, validator
 from sklearn.pipeline import Pipeline
 
 from melusine.backend import backend
@@ -21,98 +20,10 @@ from melusine.io import IoMixin
 T = TypeVar("T")
 
 
-class PipelineStepConf(BaseModel):
+class PipelineConfigurationError(Exception):
     """
-    Pydantic model for pipeline steps config.
+    Error raised when an error is found in the pipeline configuration.
     """
-
-    class_name: str
-    module: str
-    name: Optional[str] = None
-    config_key: Optional[str] = None
-    parameters: Optional[Dict] = None
-
-    @root_validator(pre=True)
-    @classmethod
-    def check_config_key_or_args(cls, values: Dict[str, Any]) -> Dict[str, Any]:
-        """
-        Make sure that the step conf contains either:
-        - a config_key field
-        - a name field and a parameter field
-
-        Args:
-        values: Values of the step configuration.
-
-        Returns:
-        _: Values of the step configuration.
-        """
-        if not values.get("config_key"):
-            if not (values.get("name") and values.get("parameters")):
-                raise ValueError("abc")
-
-        return values
-
-    @validator("name", always=True)
-    @classmethod
-    def validate_name(cls, name: str, values: Dict[str, Any]) -> str:
-        """
-        If a config_key is specified, use it as name.
-        Otherwise, use the name field.
-
-        Parameters
-        ----------
-        name: Optional[str]
-            Step parameters
-        values: Dict[Any]
-            Values of the step configuration.
-
-        Returns
-        -------
-        _: str
-            The founded key.
-        """
-        config_key = values.get("config_key")
-
-        # Get parameters from config
-        if config_key:
-            return config_key
-
-        return name
-
-    @validator("parameters", always=True)
-    @classmethod
-    def validate_parameters(cls, parameters: str, values: Dict[str, Any]) -> str:
-        """
-        If a config_key is specified, get the step parameters from the Melusine config.
-        Otherwise, use the parameters field.
-
-        Parameters
-        ----------
-        parameters: Optional[Dict[str, Any]]
-            Step parameters
-        values: Dict[Any]
-            Values of the step configuration.
-
-        Returns
-        -------
-        _: str
-            The founded key.
-        """
-        config_key = values.get("config_key")
-
-        # Get parameters from config
-        if config_key:
-            return config[config_key]
-
-        return parameters
-
-
-class PipelineConf(BaseModel):
-    """
-    Pydantic model for pipelines config.
-    """
-
-    steps: List[PipelineStepConf]
 
 
 class MelusinePipeline(Pipeline):
@@ -322,6 +233,75 @@ class MelusinePipeline(Pipeline):
         return cls(steps=steps, **init_params)
 
     @classmethod
+    def validate_step_config(cls, step: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Validate a pipeline step configuration.
+
+        Parameters
+        ----------
+        step: Dict with a pipeline step configuration
+
+        Returns
+        -------
+        _: Validated pipeline step configuration.
+        """
+        if not step.get(cls.OBJ_CLASS) or not step.get(cls.OBJ_MODULE):
+            raise PipelineConfigurationError(
+                f"Pipeline step conf should have a {cls.OBJ_MODULE} key and a {cls.OBJ_CLASS} key."
+            )
+
+        if step.get(cls.OBJ_KEY):
+            return {
+                cls.OBJ_CLASS: step[cls.OBJ_CLASS],
+                cls.OBJ_MODULE: step[cls.OBJ_MODULE],
+                cls.OBJ_KEY: step[cls.OBJ_KEY],
+            }
+
+        if not step.get(cls.OBJ_NAME) or not step.get(cls.OBJ_PARAMS):
+            raise PipelineConfigurationError(
+                f"Pipeline step conf should have a {cls.OBJ_NAME} key and a {cls.OBJ_KEY} key "
+                f"(unless a {cls.OBJ_KEY} is specified)."
+            )
+
+        if not isinstance(step[cls.OBJ_PARAMS], dict):
+            raise PipelineConfigurationError(
+                f"The key {cls.OBJ_PARAMS} should be dictionary not {type(step[cls.OBJ_PARAMS])}"
+            )
+
+        return {
+            cls.OBJ_CLASS: step[cls.OBJ_CLASS],
+            cls.OBJ_MODULE: step[cls.OBJ_MODULE],
+            cls.OBJ_NAME: step[cls.OBJ_NAME],
+            cls.OBJ_PARAMS: step[cls.OBJ_PARAMS],
+        }
+
+    @classmethod
+    def validate_pipeline_config(cls, pipeline_conf: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Validate a pipeline configuration.
+
+        Parameters
+        ----------
+        pipeline_conf: Dict with a pipeline configuration
+
+        Returns
+        -------
+        _: Validated pipeline configuration.
+        """
+        validated_pipeline_conf: Dict[str, Any] = {cls.STEPS_KEY: []}
+        steps = pipeline_conf.get(cls.STEPS_KEY)
+
+        if not steps or not isinstance(steps, list):
+            raise PipelineConfigurationError(
+                f"Pipeline conf should have a {cls.STEPS_KEY} key containing a list of steps."
+            )
+        else:
+            for step in steps:
+                validated_pipeline_conf[cls.STEPS_KEY].append(cls.validate_step_config(step))
+
+        return validated_pipeline_conf
+
+    @classmethod
     def parse_pipeline_config(cls, config_dict: Dict[str, Any]) -> Dict[str, Any]:
         """
         Parse config dict to replace config key by the associated configurations.
@@ -339,8 +319,7 @@ class MelusinePipeline(Pipeline):
         config_dict = copy.deepcopy(config_dict)
 
         # Validate raw pipeline conf
-        config_dict = PipelineConf(**config_dict).dict(exclude_unset=True)
-        config_dict = cast(Dict[str, Any], config_dict)
+        config_dict = cls.validate_pipeline_config(config_dict)
 
         steps = []
         for step in config_dict[cls.STEPS_KEY]:

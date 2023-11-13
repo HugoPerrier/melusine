@@ -45,14 +45,12 @@ class DictBackend(BaseTransformerBackend):
         _: Dict[str: Any]
             Transformed data
         """
-
-        # Use Series.apply
         if input_columns and len(input_columns) == 1:
             input_column = input_columns[0]
 
             # Modify the entire dict
             if not output_columns:
-                data = func(data[input_column], **kwargs)
+                raise ValueError("DictBackend does not support single input + None output situation.")
 
             # Create a single new field
             elif len(output_columns) == 1:

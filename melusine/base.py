@@ -15,15 +15,11 @@ from __future__ import annotations
 
 import copy
 import inspect
-import json
 import logging
-import os
 import re
 from abc import ABC, abstractmethod
-from pathlib import Path
-from typing import Any, Callable, Dict, Iterable, List, Optional, Sequence, Tuple, TypeVar, Union
+from typing import Any, Callable, Dict, Iterable, List, Optional, TypeVar, Union
 
-import numpy as np
 import pandas as pd
 from sklearn.base import BaseEstimator, TransformerMixin
 
@@ -319,532 +315,10 @@ class MelusineDetector(BaseMelusineDetector, ABC):
         """What needs to be done after detection (e.g., mapping columns)."""
 
 
-class MelusineModel(IoMixin, ABC):
-    """
-    Base class for all Melusine models.
-
-    Is an abstract class.
-
-    Implement generic methods such as:
-    [predict, train, load, save, label encoding, etc.]
-    """
-
-    # Class constants
-    INFERENCE_MODE_KEY: str = "_inference_mode"
-    INFERENCE_MODE_LOCAL: str = "LOCAL"
-    STANDARD_CONFIG_KEY: str = "melusine_model"
-
-    def __init__(self, label_processor: BaseLabelProcessor) -> None:
-        """
-        Attributes initialization.
-
-        Parameters
-        ----------
-        label_processor: BaseLabelProcessor
-            Object to process supervised learning labels.
-        """
-
-        super().__init__()
-
-        # Attributes not to be pickled
-        self.pkl_exclude_list: List[str] = ["model"]
-        self.json_exclude_list.append("model")
-
-        self.label_processor = label_processor
-
-        self.model: Any
-        self.inference_mode: str
-
-    def __getstate__(self) -> Dict[str, Any]:
-        """
-        Override __getstate__ to prevent pickling model objects.
-
-        Model objects should be saved separately.
-
-        Returns
-        -------
-        save_dict: Dict[str, Any]
-            Filtered dict.
-        """
-        save_dict: Dict[str, Any] = self.__dict__.copy()
-        return {k: v for k, v in save_dict.items() if k not in self.pkl_exclude_list}
-
-    @property
-    @abstractmethod
-    def model_input_columns(self) -> List[str]:
-        """
-        List all columns required as input to use the model.
-
-        Returns
-        -------
-        _: List[str]
-            List of required input columns.
-        """
-
-    @abstractmethod
-    def pre_train(self, x: Union[np.ndarray, pd.DataFrame], y: Optional[pd.Series] = None) -> None:
-        """
-        Method to run everything that needs to be run prior to the training and that requires access to the train data.
-
-        Parameters
-        ----------
-        x: pd.DataFrame
-            Train features.
-        y: pd.Series
-            Supervised learning labels.
-        """
-
-    @abstractmethod
-    def prepare_input(self, x: pd.DataFrame) -> Union[List[np.ndarray], np.ndarray]:
-        """
-        Run transformation of the input data.
-        Return data in a format ready to be fed to the ML/DL model.
-
-        Parameters
-        ----------
-        x: pd.DataFrame
-            Train features.
-
-        Returns
-        -------
-        _: Union[List[np.ndarray], np.ndarray]
-            Prepared train features.
-        """
-
-    @abstractmethod
-    def build_network(self) -> None:
-        """
-        Assemble the deep learning network.
-        """
-
-    @abstractmethod
-    def train_model(self, x: Union[List[np.ndarray], np.ndarray], y: Optional[np.ndarray] = None, **kwargs: Any) -> Any:
-        """
-        Method to launch the model training.
-
-        Parameters
-        ----------
-        x: Union[List[np.ndarray], np.ndarray]
-            Model inputs.
-        y: np.ndarray
-            Labels.
-        kwargs: Any
-            Keyword arguments.
-
-        Returns
-        -------
-        _: Any
-            Can be everything as keras 'history' for example.
-        """
-
-    def train(self, x: pd.DataFrame, y: pd.Series, **kwargs: Any) -> None:
-        """
-        Train model.
-
-        Parameters
-        ----------
-        x: pandas.DataFrame
-            DataFrame with raw features.
-        y: pandas.Series
-            Series with raw categories.
-        kwargs: Any
-            Keyword arguments.
-        """
-
-        # Run pre-training step
-        self.pre_train(x, y)
-
-        # Fit label encoder
-        self.label_processor.fit(y)
-
-        # Create neural network
-        self.build_network()
-
-        # Transform train features and labels
-        x_input = self.prepare_input(x)
-        y_cat = self.label_processor.transform(y)
-
-        # Prepare validation data if there are some
-        validation_data = kwargs.pop("validation_data", None)
-        if validation_data:
-            validation_data = self.prepare_validation_data(validation_data)
-            kwargs["validation_data"] = validation_data
-
-        # Train model
-        self.train_model(x_input, y_cat, **kwargs)
-
-    def prepare_validation_data(self, validation_data: Sequence) -> Sequence:
-        """
-        Prepare validation data for the model.
-
-        Parameters
-        ----------
-        validation_data: Iterable
-            Training data as 1st argument,
-            Labels as second argument.
-
-        Returns
-        -------
-        prepared_validation_data: Iterable
-            Transformed training data as 1st argument,
-            Transformed labels as second argument
-        """
-        if len(validation_data) < 2:
-            raise ValueError(
-                "'validation_data' should be an Iterable with:"
-                "- training data as 1st argument"
-                "- labels as second argument"
-            )
-
-        x_val_prepared = self.prepare_input(validation_data[0])
-        y_val_cat = self.label_processor.transform(validation_data[1])
-        prepared_validation_data = (x_val_prepared, y_val_cat, *validation_data[2:])
-
-        return prepared_validation_data
-
-    def validate_input_fields(self, x: pd.DataFrame) -> None:
-        """
-        Make sure that the required columns are present in the input DataFrame.
-
-        Parameters
-        ----------
-        x: pd.DataFrame
-            Input DataFrame.
-        """
-
-        missing_fields = set(self.model_input_columns).difference(x.columns)
-        if missing_fields:
-            raise MissingModelInputFieldError(f"Error for model '{type(self)}'.\nFields {missing_fields} are required.")
-
-    def predict(self, x: pd.DataFrame, **kwargs: Any) -> Any:
-        """
-        Run model predict on input data.
-
-        Parameters
-        ----------
-        x: pd.DataFrame
-            DataFrame with raw features.
-        kwargs: Any
-            Keyword arguments.
-
-        Returns
-        -------
-        _: Any
-            Prediction results.
-        """
-        self.validate_input_fields(x)
-        x_input = self.prepare_input(x)
-
-        return self.model.predict(x_input, **kwargs)
-
-    def predict_labels(self, x: pd.DataFrame, **kwargs: Any) -> Iterable[Tuple[str, float]]:
-        """
-        Run model predict on input data and compute the label with the maximum probability.
-        Return a tuple (best_label, label_proba).
-
-        Parameters
-        ----------
-        x: pd.DataFrame
-            DataFrame with raw features.
-        kwargs: Any
-            Keyword arguments.
-
-        Returns
-        -------
-        _: Iterable[Tuple[str, float]]
-            Tuple with predicted label and associated probability.
-        """
-        results: Any = self.predict(x, **kwargs)
-        labels, proba = self.label_processor.post_process(results)
-
-        return list(zip(labels, proba))
-
-    @staticmethod
-    def get_versioned_model_path(path: str, version: Optional[str]) -> str:
-        """
-        Method to get the path to the desired version of the model.
-
-        Parameters
-        ----------
-        path: str
-            Base path to the model folder.
-        version: Optional[str]
-            Model version of interest.
-
-        Returns
-        -------
-        _: str
-            Path to the versioned model if applicable, base path to the model folder otherwise.
-        """
-        if version is not None:
-            if not (Path(path) / version).exists():
-                raise FileNotFoundError(f"Could not find version folder {version} at path {path}")
-            path = str(Path(path) / version)
-
-        return path
-
-    @staticmethod
-    def search_file(filename: str, path: str, filename_prefix: Optional[str] = None) -> str:
-        """
-        Look for a file at a given path.
-
-        Parameters
-        ----------
-        filename: str
-            Base file name.
-        path: str
-            Path to the file.
-        filename_prefix: Optional[str]
-            File name prefix.
-
-        Returns
-        -------
-        full_path: str
-            Full path to the file.
-        """
-        # Look for candidate files at given path
-        if filename_prefix:
-            filename = f"{filename_prefix}_{filename}"
-        else:
-            filename = f"{filename}"
-
-        file_path = os.path.join(path, filename)
-
-        # Nothing found at given path
-        if (not os.path.isfile(file_path)) and (not os.path.isdir(file_path)):
-            raise FileNotFoundError(f"Could not find files at path {file_path}")
-
-        return file_path
-
-    @classmethod
-    def load_json(cls, path: str, filename_prefix: Optional[str] = None) -> Dict[str, Any]:
-        """
-        Load data from a json file
-
-        Parameters
-        ----------
-        path: str
-            Load path
-        filename_prefix: Optional[str]
-            File name prefix.
-
-        Returns
-        -------
-        data: dict
-            Data loaded from the json file
-        """
-        filename = cls.__name__ + cls.JSON_SUFFIX
-        filepath = cls.search_file(filename, path, filename_prefix=filename_prefix)
-        with open(filepath, encoding="utf-8") as file:
-            data = json.load(file)
-
-        return data
-
-    def __repr__(self) -> str:
-        """
-        Class display method.
-
-        Returns
-        -------
-        _: str
-            String representation.
-        """
-        class_repr: str = ""
-        for key, value in self.__dict__.items():
-            if key in ["json_exclude_list", "pkl_exclude_list"]:
-                continue
-            class_repr += f"{key}: {value}\n"
-
-        return class_repr
-
-
-class BaseLabelProcessor(ABC):
-    """
-    Class to process supervised learning labels.
-    """
-
-    @property
-    @abstractmethod
-    def n_targets(self) -> int:
-        """
-        Number of class targets.
-
-        Returns
-        -------
-        n_targets: int
-            Number of targets (Ex: number of classes in a classification task).
-        """
-
-    @property
-    @abstractmethod
-    def classes_(self) -> Sequence[str]:
-        """
-        Get the classes of the fitted encoder
-
-        Returns
-        -------
-        classes_: Sequence[str]
-            All the labels known by the encoder.
-        """
-
-    @abstractmethod
-    def fit(self, df: pd.series, y: Optional[Any] = None) -> None:
-        """
-        Fit the label processor.
-
-        Parameters
-        ----------
-        df: pd.Series
-            Input data.
-        y: Any
-            Supervised learning labels.
-        """
-
-    @abstractmethod
-    def transform(self, df: pd.Series) -> np.ndarray:
-        """
-        Transform input data.
-
-        Parameters
-        ----------
-        df: MelusineDataset
-            Input data.
-
-        Returns
-        -------
-        _: MelusineDataset
-            Tranformed data (output).
-        """
-
-    @abstractmethod
-    def inverse_transform(self, y: Union[pd.Series, np.ndarray]) -> np.ndarray:
-        """
-        Inverse transform labels.
-
-        Parameters
-        ----------
-        y: pd.Series
-            Encoded labels
-
-        Returns
-        -------
-        _: numpy.ndarray
-            Decoded labels
-        """
-
-    @abstractmethod
-    def post_process(self, y_hat: np.ndarray) -> Tuple[Any, Any]:
-        """
-        Take as input the predictions of the model and return the labels with its
-        associated score.
-
-        Parameters
-        ----------
-        y_hat: np.ndarray
-                The array of predictions given by the model
-
-        Returns
-        -------
-        labels: Sequence[List[str]]
-                List of predicted labels.
-        scores: Sequence[List[float]]
-                Scores or probabilities associated to the given label.
-        """
-
-
-class MissingModelInputFieldError(Exception):
-    """
-    Exception raised when a missing field is encountered by a MelusineModel
-    """
-
-
 class MissingFieldError(Exception):
     """
     Exception raised when a missing field is encountered by a MelusineTransformer
     """
-
-
-class MelusineFeatureEncoder(ABC):
-    """
-    Base class for all Melusine meta-feature encoders:
-    - Ordinal categorical features
-    - Non-ordinal categorical features
-    """
-
-    ARBITRARY_VALUE: str = "__arbitrary__"
-
-    def __init__(self) -> None:
-        self._n_features: Optional[int] = None
-
-    def preprocess_input(self, input_data: MelusineDataset, replace_na: bool = True) -> MelusineDataset:
-        """
-        Perform preprocessing of the input data before feeding it to the encoder.
-
-        Parameters
-        ----------
-        input_data: pd.Series
-            Series containing the input values to be encoded.
-        replace_na:
-            If True, invalid values are replaced by None.
-
-        Returns
-        -------
-        input_data: MelusineDataset
-            Value to be encoded.
-        """
-        return input_data
-
-    @property
-    def n_features(self) -> int:
-        """
-        Number of features created by the encoder.
-        Watchout : Feature != Category
-        For a variable with 2 categories (binary) there could be just one
-        feature created.
-
-        Returns
-        -------
-        _: int
-            Number of features created by the encoder
-        """
-        if self._n_features is None:
-            raise AttributeError("Attribute self._n_features is None. Encoder not fitted?")
-        else:
-            return self._n_features
-
-    @abstractmethod
-    def fit(self, data: pd.Series, y: Optional[pd.Series] = None) -> MelusineFeatureEncoder:
-        """
-        Fit the feature encoder.
-
-        Parameters
-        ----------
-        data: pd.Series
-            Input data.
-        y: pd.Series
-            Supervised learning labels.
-
-        Returns
-        -------
-        _: MelusineFeatureEncoder
-            Fitted instance.
-        """
-
-    @abstractmethod
-    def transform(self, data: pd.Series) -> pd.Series:
-        """
-        Transform input data.
-
-        Parameters
-        ----------
-        data: pd.Series
-            Input data.
-
-        Returns
-        -------
-        _: ps.Series
-            Tranformed data (output).
-        """
 
 
 class MelusineRegex(ABC):
@@ -853,8 +327,6 @@ class MelusineRegex(ABC):
     """
 
     REGEX_FLAGS: re.RegexFlag = re.IGNORECASE | re.MULTILINE
-    DEFAULT_MATCH_GROUP: str = "DEFAULT"
-    DEFAULT_SUBSTITUTION_PATTERN: str = " "
 
     # Match fields
     MATCH_RESULT: str = "match_result"
@@ -866,6 +338,14 @@ class MelusineRegex(ABC):
     MATCH_START: str = "start"
     MATCH_STOP: str = "stop"
     MATCH_TEXT: str = "match_text"
+
+    def __init__(self, substitution_pattern: str = " ", default_match_group: str = "DEFAULT"):
+        if not isinstance(substitution_pattern, str) or (len(substitution_pattern) > 1):
+            raise ValueError(
+                f"Parameter substitution_pattern should be a string of length 1, not {substitution_pattern}"
+            )
+        self.substitution_pattern = substitution_pattern
+        self.default_match_group = default_match_group
 
     @property
     def regex_name(self) -> str:
@@ -926,7 +406,7 @@ class MelusineRegex(ABC):
         """
 
     def _get_match(
-        self, text: str, base_regex: Union[str, Dict[str, str]], regex_group: str = DEFAULT_MATCH_GROUP
+        self, text: str, base_regex: Union[str, Dict[str, str]], regex_group: Optional[str] = None
     ) -> Dict[str, List[Dict[str, Any]]]:
         """
         Run specified regex on the input text and return a dict with matching group as key.
@@ -940,6 +420,9 @@ class MelusineRegex(ABC):
             Dict of regex matches for each regex group.
         """
         match_data_dict = {}
+
+        if regex_group is None:
+            regex_group = self.default_match_group
 
         if isinstance(base_regex, dict):
             for group, regex in base_regex.items():
@@ -978,20 +461,17 @@ class MelusineRegex(ABC):
         Returns:
             _: Text with substituions.
         """
-        if len(self.DEFAULT_SUBSTITUTION_PATTERN) > 1:
-            raise AttributeError(f"Substitution pattern {self.DEFAULT_SUBSTITUTION_PATTERN} should be 1 character long")
-
         for _, match_list in match_data_dict.items():
             for match_data in match_list:
                 start = match_data[self.MATCH_START]
                 stop = match_data[self.MATCH_STOP]
 
                 # Mask text to ignore
-                text = text[:start] + self.DEFAULT_SUBSTITUTION_PATTERN * (stop - start) + text[stop:]
+                text = text[:start] + self.substitution_pattern * (stop - start) + text[stop:]
 
         return text
 
-    def direct_match(self, text: str) -> bool:
+    def get_match_result(self, text: str) -> bool:
         """
         Apply MelusineRegex patterns (neutral, negative and positive) on the input text.
         Return a boolean output of the match result.
@@ -1002,10 +482,10 @@ class MelusineRegex(ABC):
         Returns:
             _: True if the MelusineRegex matches the input text.
         """
-        result = self.match(text)
+        result = self(text)
         return result[self.MATCH_RESULT]
 
-    def match(self, text: str) -> Dict[str, Any]:
+    def __call__(self, text: str) -> Dict[str, Any]:
         """
         Apply MelusineRegex patterns (neutral, negative and positive) on the input text.
         Return a detailed output of the match results as a dict.
@@ -1068,7 +548,12 @@ class MelusineRegex(ABC):
                         print(f"{indent}stop: {match_dict[self.MATCH_STOP]}")
 
         indent = " " * 4
-        match_data = self.match(text)
+        match_data = self(text)
+
+        if match_data[self.MATCH_RESULT]:
+            print("The MelusineRegex match result is : POSITIVE")
+        else:
+            print("The MelusineRegex match result is : NEGATIVE")
 
         if not any(
             [
@@ -1096,11 +581,11 @@ class MelusineRegex(ABC):
         Test the MelusineRegex on the match_list and no_match_list.
         """
         for text in self.match_list:
-            match = self.match(text)
+            match = self(text)
             assert match[self.MATCH_RESULT] is True, f"Expected match for text\n{text}\nObtained: {match}"
 
         for text in self.no_match_list:
-            match = self.match(text)
+            match = self(text)
             assert match[self.MATCH_RESULT] is False, f"Expected no match for text:\n{text}\nObtained: {match}"
 
     def __repr__(self) -> str:

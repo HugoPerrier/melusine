@@ -2,14 +2,16 @@
 Unit tests of the VacationReplyDetector
 """
 import pytest
+import pandas as pd
 from pandas import DataFrame
 
 from melusine.detectors import VacationReplyDetector
 from melusine.message import Message
+from melusine.pipeline import MelusinePipeline
 
 
 def test_instanciation():
-    """Instanciation unit test."""
+    """Instanciation base test."""
     detector = VacationReplyDetector(
         name="vacation_reply",
         messages_column="messages",
@@ -157,3 +159,51 @@ def test_transform_debug_mode(df, good_detection_result, good_debug_info):
     # Test result
     assert result == good_detection_result
     assert debug_result == good_debug_info
+
+@pytest.mark.parametrize(
+    "df, expected_result",
+    [
+        (
+            pd.DataFrame(
+                {
+                    "from": ["test@gmail.com"],
+                    "header": [""],
+                    "body": [
+                        "Bonjour, \nActuellement en congé je prendrai connaissance"
+                        + " de votre message ultérieurement.\nCordialement,"
+                    ],
+                }
+            ),
+            True,
+        ),
+        (
+            pd.DataFrame(
+                {
+                    "from": ["test@gmail.com"],
+                    "header": [""],
+                    "body": [
+                        "Bonjour,\nje vous confirme l'annulation du rdv du 01/01/2001 "
+                        + "à 16h.\nBien cordialement,\nJohn Smith."
+                    ],
+                }
+            ),
+            False,
+        ),
+    ],
+)
+def test_pipeline_from_config(df, expected_result):
+    """
+    Instanciate from a config and test the pipeline.
+    """
+    # Pipeline config key
+    pipeline_key = "vacation_reply_pipeline"
+
+    # Create pipeline from config
+    pipeline = MelusinePipeline.from_config(config_key=pipeline_key)
+
+    # Apply pipeline on data
+    df_transformed = pipeline.transform(df)
+    result = df_transformed["vacation_reply_result"][0]
+
+    # Check
+    assert result == expected_result

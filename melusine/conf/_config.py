@@ -91,7 +91,7 @@ class MelusineConfig(UserDict):
             config_dict = self._load_from_path(config_path)
 
         if config_dict is None:
-            raise MelusineConfigError()
+            raise MelusineConfigError()  # pragma no cover
 
         self.data = config_dict
 

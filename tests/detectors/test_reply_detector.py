@@ -1,17 +1,16 @@
 """
 Unit tests of the ReplyDetector.
 """
-
-from tempfile import TemporaryDirectory
-
+import pandas as pd
 import pytest
 from pandas import DataFrame
 
 from melusine.detectors import ReplyDetector
+from melusine.pipeline import MelusinePipeline
 
 
 def test_instantiation():
-    """Instanciation unit test."""
+    """Instanciation base test."""
 
     # Instantiate manually a detector
     detector = ReplyDetector(
@@ -47,7 +46,7 @@ def test_instantiation():
     ],
 )
 def test_deterministic_detect(row, good_result):
-    """Method unit test."""
+    """Method base test."""
 
     # Instanciate manually a detector
     detector = ReplyDetector(
@@ -169,3 +168,72 @@ def test_transform_debug_mode(df_emails, expected_result, expected_debug_info):
     # Test result
     assert result == expected_result
     assert debug_result == expected_debug_info
+
+
+@pytest.mark.parametrize(
+    "df, expected_result",
+    [
+        (
+            pd.DataFrame(
+                {
+                    "from": ["test@gmail.com"],
+                    "header": ["Re: Suivi de dossier"],
+                    "body": ["Bonjour,\nle traitement de ma demande est deplorable.\nje suis tres en colere.\n"],
+                }
+            ),
+            True,
+        ),
+        (
+            pd.DataFrame(
+                {
+                    "from": ["test@gmail.com"],
+                    "header": ["re: Envoi d'un document de la Société Imaginaire"],
+                    "body": ["Bonjour,\nLe traitement de ma demande est déplorable.\nJe suis très en colère.\n"],
+                }
+            ),
+            True,
+        ),
+        (
+            pd.DataFrame(
+                {
+                    "from": ["test@gmail.com"],
+                    "header": ["te: Virement"],
+                    "body": [
+                        "Bonjour,\nJe vous confirme l'annulation du rdv du 01/01/2022 "
+                        + "à 16h.\nBien cordialement,\nJohn Smith."
+                    ],
+                }
+            ),
+            False,
+        ),
+        (
+            pd.DataFrame(
+                {
+                    "from": ["test@gmail.com"],
+                    "header": [""],
+                    "body": [
+                        "Bonjour,\nJe vous confirme l'annulation du rdv du 01/01/2022 "
+                        + "à 16h.\nBien cordialement,\nJohn Smith."
+                    ],
+                }
+            ),
+            False,
+        ),
+    ],
+)
+def test_pipeline_from_config(df, expected_result):
+    """
+    Instanciate from a config and test the pipeline.
+    """
+    # Pipeline config key
+    pipeline_key = "reply_pipeline"
+
+    # Create pipeline from config
+    pipeline = MelusinePipeline.from_config(config_key=pipeline_key)
+
+    # Apply pipeline on data
+    df_transformed = pipeline.transform(df)
+    result = df_transformed["reply_result"][0]
+
+    # Check
+    assert result == expected_result

@@ -6,6 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "melusine"
 authors = [
     {name = "TODO", email = "todo@maif.fr"},
+    {name = "Hugo Perrier", email = "hugorperrier@gmail.com"},
 ]
 description = "Melusine is"
 requires-python = ">=3.8"
@@ -21,18 +22,13 @@ dependencies = [
     "scikit-learn>=1",
     "tqdm>=4.34",
     "omegaconf>=2.0",
-    "pydantic>=1.8,<2",
-    # unidecode >= 1.0
     # flashtext >= 2.7
-    # joblib >= 0.15
-    # PyYAML >= 4.2
 ]
 dynamic = ["version", "readme"]
 
 [project.optional-dependencies] # Optional
 dev = []
 test = ["pytest", "coverage"]
-misc = ["factory-boy"]
 transformers = ["transformers>4"]
 
 [tool.setuptools.packages.find]
@@ -49,3 +45,17 @@ readme = {file = ["README.md"]}
 
 [tool.black]
 line-length = 120
+
+[tool.coverage.run]
+omit = [
+    # omit init files in docs_src
+    "docs/__init__.py",
+    "docs/docs_src/*/__init__.py",
+    # omit test files
+    "tests/*",
+    # omit anything in a .local directory anywhere
+    "*/.local/*",
+    # omit single files
+    "melusine/connectors/__init__.py",
+    "melusine/connectors/exchange.py",
+]
