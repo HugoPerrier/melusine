@@ -198,7 +198,7 @@ def test_invalid_config_key():
                     },
                 ]
             },
-            id="Missing steps key"
+            id="Missing steps key",
         ),
         pytest.param(
             {
@@ -209,7 +209,7 @@ def test_invalid_config_key():
                     },
                 ]
             },
-            id="Missing module key"
+            id="Missing module key",
         ),
         pytest.param(
             {
@@ -221,7 +221,7 @@ def test_invalid_config_key():
                     },
                 ]
             },
-            id="Missing parameters key"
+            id="Missing parameters key",
         ),
         pytest.param(
             {
@@ -234,7 +234,7 @@ def test_invalid_config_key():
                     },
                 ]
             },
-            id="Erroneous parameters type"
+            id="Erroneous parameters type",
         ),
         pytest.param(
             {
@@ -256,9 +256,9 @@ def test_invalid_config_key():
                     },
                 ]
             },
-            id="Missing name key"
+            id="Missing name key",
         ),
-    ]
+    ],
 )
 def test_pipeline_config_error(pipeline_conf):
     """

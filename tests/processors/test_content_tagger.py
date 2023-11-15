@@ -1,8 +1,9 @@
 import re
+
 import pytest
 
 from melusine.message import Message
-from melusine.processors import ContentTagger, Tag, BaseContentTagger
+from melusine.processors import BaseContentTagger, ContentTagger, Tag
 
 
 def test_content_tagger():
@@ -582,23 +583,13 @@ def test_call_method():
 @pytest.mark.parametrize(
     "text, n_words, word_character_only, expected_match",
     [
+        pytest.param("Hello you", 4, False, True, id="4 words match"),
+        pytest.param("Hello how are you today", 4, False, False, id="4 words no match"),
+        pytest.param("Hello! you?", 4, False, True, id="4 words match with special characters"),
         pytest.param(
-            "Hello you", 4, False, True,
-            id="4 words match"
+            "Hello! you?", 4, True, False, id="4 words match with special characters (word character only True)"
         ),
-        pytest.param(
-            "Hello how are you today", 4, False, False,
-            id="4 words no match"
-        ),
-        pytest.param(
-            "Hello! you?", 4, False, True,
-            id="4 words match with special characters"
-        ),
-        pytest.param(
-            "Hello! you?", 4, True, False,
-            id="4 words match with special characters (word character only True)"
-        ),
-    ]
+    ],
 )
 def test_word_blocks(text, n_words, word_character_only, expected_match):
     regex = BaseContentTagger.word_block(n_words, word_character_only=word_character_only)

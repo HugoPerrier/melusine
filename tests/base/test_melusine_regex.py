@@ -126,7 +126,7 @@ def test_repr():
     assert "VirusRegex" in repr(regex)
 
 
-def default_neutral_and_negative():
+def test_default_neutral_and_negative():
     """
     Test a regex class using default neutral and negative properties.
     """
@@ -149,4 +149,5 @@ def default_neutral_and_negative():
             return ["bip bip"]
 
     regex = SomeRegex()
-    assert regex("test")
+    assert regex.neutral is None
+    assert regex.negative is None

@@ -53,7 +53,7 @@ class IoMixin:
         _: T
             Instantiated objet.
         """
-        # Load from Melusine confi
+        # Load from Melusine config
         if config_dict is None:
             if config_key is None:
                 raise ValueError("You should specify one and only one of 'config_key' and 'config_value'")

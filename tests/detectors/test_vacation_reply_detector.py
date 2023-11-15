@@ -1,8 +1,8 @@
 """
 Unit tests of the VacationReplyDetector
 """
-import pytest
 import pandas as pd
+import pytest
 from pandas import DataFrame
 
 from melusine.detectors import VacationReplyDetector
@@ -159,6 +159,7 @@ def test_transform_debug_mode(df, good_detection_result, good_debug_info):
     # Test result
     assert result == good_detection_result
     assert debug_result == good_debug_info
+
 
 @pytest.mark.parametrize(
     "df, expected_result",

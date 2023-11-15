@@ -3,8 +3,8 @@ Unit tests of the TransferDetector.
 """
 
 
-import pytest
 import pandas as pd
+import pytest
 from pandas import DataFrame
 
 from melusine.detectors import TransferDetector

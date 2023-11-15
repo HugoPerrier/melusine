@@ -25,12 +25,14 @@ class ActiveBackend(BaseTransformerBackend):
     PANDAS_BACKEND: str = "pandas"
     DICT_BACKEND: str = "dict"
 
-    def __init__(self):
+    def __init__(self) -> None:
+        """Init"""
         super().__init__()
         self._backend: Optional[BaseTransformerBackend] = None
 
     @property
     def backend(self) -> BaseTransformerBackend:
+        """Backend attribute getter"""
         if self._backend is None:
             raise AttributeError("'_backend' attribute is None")
 

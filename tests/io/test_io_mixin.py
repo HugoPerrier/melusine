@@ -47,4 +47,4 @@ def test_from_config_dict_and_config_key_error():
 
 def test_from_config_dict_and_config_key_none_error():
     with pytest.raises(ValueError):
-        _ = FakeClass.from_config(config_dict={}, config_key={})
+        _ = FakeClass.from_config()

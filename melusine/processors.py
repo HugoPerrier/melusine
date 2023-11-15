@@ -815,7 +815,8 @@ class BaseContentTagger(MelusineTransformer):
         """
         return self.regex_dict[key]
 
-    def compile_split_pattern(self) -> re.Pattern:
+    @staticmethod
+    def compile_split_pattern() -> re.Pattern:
         """
         Method to compile the sentence split regex pattern.
 
@@ -1143,13 +1144,11 @@ class BaseContentTagger(MelusineTransformer):
                 if regex_match:
                     matching_regex_list.append(r)
 
-        elif isinstance(regex, re.Pattern):
+        else:
             regex_match = regex.match(part)
             if regex_match:
                 matching_regex_list.append(regex.pattern)
 
-        else:
-            raise ValueError(f"Invalid regex pattern definition : {regex}")
         return matching_regex_list
 
     @abstractmethod
@@ -1711,7 +1710,7 @@ class DeterministicTextFlagger(MelusineTransformer):
         self.remove_multiple_spaces = remove_multiple_spaces
 
     @staticmethod
-    def _flag_text(
+    def default_flag_text(
         text: str,
         flag_dict: Dict[str, str],
         add_spaces: bool = True,
@@ -1741,7 +1740,7 @@ class DeterministicTextFlagger(MelusineTransformer):
         # Support for nested flag dicts
         for key, value in flag_dict.items():
             if isinstance(value, dict):
-                text = DeterministicTextFlagger._flag_text(
+                text = DeterministicTextFlagger.default_flag_text(
                     text=text,
                     flag_dict=value,
                     add_spaces=add_spaces,
@@ -1774,7 +1773,7 @@ class DeterministicTextFlagger(MelusineTransformer):
              Flagged text
         """
         # Join collocations
-        text = self._flag_text(
+        text = self.default_flag_text(
             text,
             self.text_flags,
             add_spaces=self.add_spaces,
@@ -1822,11 +1821,8 @@ class Cleaner(MelusineTransformer):
         _: str
              Flagged text
         """
-        if not isinstance(text, str):
-            return ""
-
         # Join collocations
-        text = DeterministicTextFlagger._flag_text(
+        text = DeterministicTextFlagger.default_flag_text(
             text,
             self.substitutions,
             add_spaces=False,
@@ -2002,6 +1998,7 @@ class DateProcessor(MelusineTransformer):
             # ISO Format
             if re.search(r"\d{4}-\d{2}-\d{2}", matched_group):
                 return matched_group
+
             # We failed finding the abbreviation so we give up and return None
             return None
 
