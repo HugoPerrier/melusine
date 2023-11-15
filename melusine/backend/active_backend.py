@@ -9,7 +9,6 @@ Implemented classes: [
 """
 
 import logging
-import os
 from typing import Callable, List, Optional, Union
 
 from melusine.backend.base_backend import Any, BaseTransformerBackend
@@ -26,19 +25,19 @@ class ActiveBackend(BaseTransformerBackend):
     PANDAS_BACKEND: str = "pandas"
     DICT_BACKEND: str = "dict"
 
-    def __init__(self, new_backend: Union[str, BaseTransformerBackend]):
-        """
-
-        Parameters
-        ----------
-        new_backend: Union[str, BaseTransformerBackend]
-            Backend to be used
-        """
+    def __init__(self):
         super().__init__()
-        # self._backend: Union[BaseTransformerBackend, None] = None
-        self._switch_backend(new_backend)
+        self._backend: Optional[BaseTransformerBackend] = None
 
-    def _switch_backend(self, new_backend: Union[BaseTransformerBackend, str]) -> None:
+    @property
+    def backend(self) -> BaseTransformerBackend:
+        if self._backend is None:
+            raise AttributeError("'_backend' attribute is None")
+
+        else:
+            return self._backend
+
+    def reset(self, new_backend: Union[BaseTransformerBackend, str] = PANDAS_BACKEND) -> None:
         """
         Method to switch from current backend to specified backend.
 
@@ -93,7 +92,7 @@ class ActiveBackend(BaseTransformerBackend):
         _: Dataset
             Transformed data
         """
-        return self._backend.apply_transform(
+        return self.backend.apply_transform(
             data=data,
             func=func,
             output_columns=output_columns,
@@ -117,7 +116,7 @@ class ActiveBackend(BaseTransformerBackend):
         _: Dataset
             Copy of original object
         """
-        return self._backend.copy(data, fields=fields)
+        return self.backend.copy(data, fields=fields)
 
     def get_fields(self, data: Any) -> List[str]:
         """
@@ -133,7 +132,7 @@ class ActiveBackend(BaseTransformerBackend):
         _: List[str]
             List of dataset fields
         """
-        return self._backend.get_fields(data=data)
+        return self.backend.get_fields(data=data)
 
     def add_fields(self, left: Any, right: Any, fields: List[str] = None) -> Any:
         """
@@ -153,7 +152,7 @@ class ActiveBackend(BaseTransformerBackend):
         _: Dataset
             Left object with added fields
         """
-        return self._backend.add_fields(left=left, right=right, fields=fields)
+        return self.backend.add_fields(left=left, right=right, fields=fields)
 
     def check_debug_flag(self, data: Any) -> bool:
         """
@@ -169,7 +168,7 @@ class ActiveBackend(BaseTransformerBackend):
         _: bool
             True if debug mode is activated
         """
-        return self._backend.check_debug_flag(data=data)
+        return self.backend.check_debug_flag(data=data)
 
     def setup_debug_dict(self, data: Any, dict_name: str) -> Any:
         """
@@ -187,32 +186,9 @@ class ActiveBackend(BaseTransformerBackend):
         _: Dataset
             MelusineDataset object
         """
-        return self._backend.setup_debug_dict(data=data, dict_name=dict_name)
+        return self.backend.setup_debug_dict(data=data, dict_name=dict_name)
 
 
-def switch_backend(new_backend: Union[BaseTransformerBackend, str]) -> None:
-    """
-    Function to switch current backend to a new backend globally.
-
-    Parameters
-    ----------
-    new_backend: Union[BaseTransformerBackend, str]
-        New backend to be used
-    """
-    global backend
-
-    backend._switch_backend(new_backend)
-
-
-def reset_backend() -> None:
-    """
-    Function to reset the global backend to the default backend.
-    """
-    switch_backend(default_backend)
-
-
-# Specify a default backend
-default_backend = ActiveBackend.PANDAS_BACKEND
-
-# Use the default backend unless a backend is specified as ENV variable
-backend = ActiveBackend(new_backend=os.getenv("MELUSINE_BACKEND", default_backend))
+# Instantiate the default backend
+backend = ActiveBackend()
+backend.reset()

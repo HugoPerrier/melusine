@@ -82,14 +82,14 @@ def use_dict_backend():
     """
     When a test modifies the melusine backend, this fixture can be used to reset the backend.
     """
-    from melusine.backend.active_backend import reset_backend, switch_backend
+    from melusine.backend.active_backend import backend
 
     # =========== Code executed before the test starts ===========
     # Use a dict backend to test a pipeline message by message
-    switch_backend("dict")
+    backend.reset("dict")
 
     # =========== Run the test ===========
     yield
 
     # =========== Code executed after the test ends ===========
-    reset_backend()
+    backend.reset()
