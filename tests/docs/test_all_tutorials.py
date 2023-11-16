@@ -5,6 +5,7 @@ from types import ModuleType
 # Tutorials not tested by this module
 exception_list = [
     "BasicClassification",
+    "Configurations",
 ]
 
 

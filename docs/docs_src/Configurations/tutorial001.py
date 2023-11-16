@@ -43,7 +43,8 @@ def modify_conf_with_dict():
 # --8<-- [end:modify_conf_with_dict]
 
 
-def modify_conf_with_path():
+def modify_conf_with_path():  # pragma: no cover
+    """Tested in conf/test_config"""
     # --8<-- [start:modify_conf_with_path]
     from melusine import config
 
@@ -59,7 +60,8 @@ def modify_conf_with_path():
 # --8<-- [end:modify_conf_with_path]
 
 
-def modify_conf_with_env():
+def modify_conf_with_env():  # pragma: no cover
+    """Tested in conf/test_config"""
     # --8<-- [start:modify_conf_with_env]
     import os
 
@@ -78,15 +80,16 @@ def modify_conf_with_env():
 # --8<-- [end:modify_conf_with_env]
 
 
-def export_config():
+def export_config():  # pragma: no cover
+    """Tested in conf/test_config"""
     # --8<-- [start:export_config]
     from melusine import config
 
     # Specify the path a folder (created if it doesn't exist)
-    my_conf_folder_path = "path/to/conf/folder"
+    conf_path = "path/to/conf/folder"
 
     # Export default configurations to the folder
-    files_created = config.export_default_config(path=my_conf_folder_path)
+    files_created = config.export_default_config(path=conf_path)
 
 
 # --8<-- [end:export_config]
