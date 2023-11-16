@@ -4,7 +4,7 @@ Setup tests and import fixtures
 import numpy as np
 import pytest
 
-from melusine.conf import config
+from melusine import config
 
 # Declare fixtures
 pytest_plugins = [

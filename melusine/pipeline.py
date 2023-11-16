@@ -11,10 +11,10 @@ from typing import Dict, Iterable, List, Optional, Set, Tuple, TypeVar
 
 from sklearn.pipeline import Pipeline
 
+from melusine import config
 from melusine.backend import backend
 from melusine.backend.base_backend import Any
 from melusine.base import MelusineTransformer
-from melusine.conf import config
 from melusine.io import IoMixin
 
 T = TypeVar("T")

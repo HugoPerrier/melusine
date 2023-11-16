@@ -498,6 +498,7 @@ class Segmenter(BaseSegmenter):
             r"(?:Message|Mail|Courriel) d'origine",
             r"Original [Mm]essage",
             r"Forwarded message",
+            r"Forwarded by",
         ]
         piped_keywords_without_semicolon = "(?:" + "|".join(meta_keywords_list_without_semicolon) + ")"  # noqa
         starter_pattern_without_semicolon = f"{piped_keywords_without_semicolon}(?:[\n ]*--+)?"

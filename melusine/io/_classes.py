@@ -8,7 +8,7 @@ from __future__ import annotations
 import logging
 from typing import Any, Dict, List, Optional, Type, TypeVar
 
-from melusine.conf import config
+from melusine import config
 
 logger = logging.getLogger(__name__)
 

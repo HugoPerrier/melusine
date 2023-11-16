@@ -4,7 +4,7 @@ Example script to fit a minimal preprocessing pipeline
 import pandas as pd
 import pytest
 
-from melusine.conf import config
+from melusine import config
 from melusine.pipeline import MelusinePipeline, PipelineConfigurationError
 from melusine.processors import Normalizer, RegexTokenizer
 

@@ -4,8 +4,8 @@ import re
 
 import pytest
 
-from melusine.conf import config
-from melusine.conf._config import MelusineConfig, MelusineConfigError
+from melusine import config
+from melusine._config import MelusineConfig, MelusineConfigError
 
 
 def test_load_default_conf(caplog):
@@ -84,3 +84,11 @@ def test_shared_variable():
     # Shared variable TEST_VAR specified in conf/shared.yaml
     # Conf test_shared_variable specified in global.yaml
     assert config["global"]["test_shared_variable"] == "test"
+
+
+def test_export_config(tmp_path):
+
+    file_list = config.export_default_config(path=str(tmp_path))
+    assert file_list
+    for file in file_list:
+        assert file.endswith(".yaml")

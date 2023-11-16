@@ -1,6 +1,6 @@
 import pytest
 
-from melusine.conf import config
+from melusine import config
 from melusine.io import IoMixin
 from melusine.io._classes import InitError
 

@@ -6,7 +6,7 @@ from typing import Any, Optional
 
 import pandas as pd
 
-from melusine.conf import config
+from melusine._config import config
 
 __all__ = ["config"]
 

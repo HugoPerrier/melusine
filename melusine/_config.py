@@ -6,7 +6,7 @@ import logging
 import os
 from collections import UserDict
 from pathlib import Path
-from typing import Any, Dict, Optional, cast, no_type_check
+from typing import Any, Dict, List, Optional, cast, no_type_check
 
 from omegaconf import OmegaConf
 
@@ -24,13 +24,7 @@ class MelusineConfig(UserDict):
     LOG_MESSAGE_DEFAULT_CONFIG = "Using default configurations."
     LOG_MESSAGE_CONFIG_FROM_ENV_VARIABLE = f"Using config_path from env variable {ENV_MELUSINE_CONFIG_DIR}."
     LOG_MESSAGE_CONFIG_PATH = "Using config_path : {config_path}."
-    DEFAULT_CONFIG_PATH = str(Path(__file__).parent.resolve())
-
-    # def __del__(self) -> None:
-    #     """
-    #     Prevent MelusineConfig modification.
-    #     """
-    #     raise MelusineConfigError()
+    DEFAULT_CONFIG_PATH = str(Path(__file__).parent.resolve() / "conf")
 
     @no_type_check
     def pop(self, s: Any = None) -> None:
@@ -94,6 +88,25 @@ class MelusineConfig(UserDict):
             raise MelusineConfigError()  # pragma no cover
 
         self.data = config_dict
+
+    def export_default_config(self, path: str) -> List[str]:
+        """
+        Export the default Melusine configurations to a directory.
+
+        Parameters
+        ----------
+        path: Destination path
+
+        Returns
+        -------
+        _:
+        """
+        from distutils.dir_util import copy_tree
+
+        source = self.DEFAULT_CONFIG_PATH
+        file_list: List[str] = copy_tree(source, path)
+
+        return file_list
 
 
 # Load Melusine configuration

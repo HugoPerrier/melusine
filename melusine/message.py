@@ -152,7 +152,7 @@ class Message:
 
         return found
 
-    def format_tags(self, total_length: int = 88, tag_name_length: int = 20) -> str:
+    def format_tags(self, total_length: int = 120, tag_name_length: int = 20) -> str:
         """
         Create a pretty formatted representation of text and their associated tags.
 
