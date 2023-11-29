@@ -69,7 +69,7 @@ def _get_dependency_version(dep_name: str) -> str:
     Returns:
         _: Dependency version or "<not_installed>"
     """
-    # note: we import 'importlib' here as a significant optimisation for initial import
+    # import here to optimize the root melusine import
     import importlib
 
     try:

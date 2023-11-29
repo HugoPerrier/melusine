@@ -62,7 +62,7 @@ Get started with melusine following our (tested!) tutorials:
 
 * [ML models](tutorials/04_UsingModels.md){target=_blank}
 
-* [MelusineDetector](tutorials/05_MelusineDetectors.md){target=_blank}
+* [MelusineDetector](tutorials/05a_MelusineDetectors.md){target=_blank}
 
 * [Configurations](tutorials/06_Configurations.md){target=_blank}
 

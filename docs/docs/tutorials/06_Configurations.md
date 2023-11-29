@@ -1,11 +1,20 @@
 # Configurations
 
-Melusine components can be instantiated using parameters defined in configuration files using the `from_config` method.  
+Melusine components can be instantiated using parameters defined in configurations.
+The `from_config` method accepts a `config_dict` argument
+```Python
+--8<--
+docs_src/Configurations/tutorial001.py:from_config_dict
+--8<--
+```
+
+or a `config_key` argument.
 ```Python
 --8<--
 docs_src/Configurations/tutorial001.py:from_config
 --8<--
 ```
+When `demo_pipeline` is given as argument, parameters are read from the `melusine.config` object at key `demo_pipeline`. 
 
 ## Access configurations
 
@@ -58,7 +67,7 @@ docs_src/Configurations/tutorial001.py:modify_conf_with_env
 ```
 
 !!! tip
-    If the `MELUSINE_CONFIG_DIR` is set at the start of your program, you don't need to call `config.reset()`. 
+    If the `MELUSINE_CONFIG_DIR` is set before melusine is imported (e.g., before starting the program), you don't need to call `config.reset()`. 
 
 ## Export configurations
 

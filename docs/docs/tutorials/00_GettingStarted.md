@@ -81,7 +81,7 @@ flowchart LR
     - ContentTagging : Associate tags (SIGNATURE, FOOTER, BODY) to parts of messages
     - Appointment detection : For exemple, detect "construction work will take place on 01/01/2024" as an appointment email.
     - More on preprocessing in the [MelusineTransformers tutorial](02_MelusineTransformers.md){target=_blank}
-    - More on detectors in the [MelusineDetector tutorial](05_MelusineDetectors.md){target=_blank}
+    - More on detectors in the [MelusineDetector tutorial](05a_MelusineDetectors.md){target=_blank}
 
 
 ## Debug mode

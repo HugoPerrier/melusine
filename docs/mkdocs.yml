@@ -27,7 +27,8 @@ nav:
 #    - tutorials/02_MelusineTransformers.md
 #    - tutorials/03_MelusineRegex.md
 #    - tutorials/04_UsingModels.md
-#    - tutorials/05_MelusineDetectors.md
+    - tutorials/05a_MelusineDetectors.md
+    - tutorials/05b_MelusineDetectorsAdvanced.md
     - tutorials/06_Configurations.md
     - tutorials/07_BasicClassification.md
   - Advanced Tutorials:

@@ -10,11 +10,26 @@ def from_config():
     # --8<-- [start:from_config]
     from melusine.pipeline import MelusinePipeline
 
-    pipeline = MelusinePipeline.from_config("demo_pipeline")
+    pipeline = MelusinePipeline.from_config(config_key="demo_pipeline")
 
 
 # --8<-- [end:from_config]
 
+def from_config_dict():
+    # --8<-- [start:from_config_dict]
+    from melusine.processors import Normalizer
+
+    normalizer_conf = {
+        'input_columns': ['text'],
+        'output_columns': ['normalized_text'],
+        'form': 'NFKD',
+        'lowercase': False,
+    }
+
+    normalizer = Normalizer.from_config(config_dict=normalizer_conf)
+
+
+# --8<-- [end:from_config_dict]
 
 def print_config():
     # --8<-- [start:print_config]

@@ -9,11 +9,15 @@ import re
 from datetime import datetime
 from typing import Iterable, List, Optional, Tuple
 
+from melusine import config
+
 
 class Message:
     """
     Class acting as a data container for email data (text, meta and features)
     """
+    DEFAULT_STR_LINE_LENGTH = 120
+    DEFAULT_STR_TAG_NAME_LENGTH = 22
 
     def __init__(
         self,
@@ -56,6 +60,20 @@ class Message:
         self.tags = tags
         self.clean_header: str = ""
         self.clean_text: str = ""
+
+    @property
+    def str_tag_name_length(self) -> int:
+        if "message" not in config:
+            return self.DEFAULT_STR_TAG_NAME_LENGTH
+        else:
+            return config["message"].get("str_tag_name_length", self.DEFAULT_STR_TAG_NAME_LENGTH)
+
+    @property
+    def str_line_length(self) -> int:
+        if "message" not in config:
+            return self.DEFAULT_STR_LINE_LENGTH
+        else:
+            return config["message"].get("str_line_length", self.DEFAULT_STR_LINE_LENGTH)
 
     def extract_parts(self, target_tags: Iterable[str] = None, stop_at: Iterable[str] = None) -> List[Tuple[str, str]]:
         """
@@ -152,13 +170,9 @@ class Message:
 
         return found
 
-    def format_tags(self, total_length: int = 120, tag_name_length: int = 20) -> str:
+    def format_tags(self) -> str:
         """
         Create a pretty formatted representation of text and their associated tags.
-
-        Args:
-            total_length: Number of characters per line.
-            tag_name_length: Number of characters to display the tag name.
 
         Returns:
             _: Pretty formatted representation of the tags and texts.
@@ -166,10 +180,10 @@ class Message:
         if self.tags is None:
             return self.text
         else:
-            tag_text_length = total_length - tag_name_length
+            tag_text_length = self.str_line_length - self.str_tag_name_length
             text = ""
             for tag_name, tag_text in self.tags:
-                text += tag_text.ljust(tag_text_length, ".") + tag_name.rjust(tag_name_length, ".") + "\n"
+                text += tag_text.ljust(tag_text_length, ".") + tag_name.rjust(self.str_tag_name_length, ".") + "\n"
 
         return text.strip()
 
@@ -198,12 +212,15 @@ class Message:
         _: str
             Readable representation of the Message.
         """
+        title_len = 22
+        fill_len = (self.str_line_length - title_len) // 2
+
         text = ""
-        text += f"{'='*33}{'Message':^22}{'='*33}\n"
-        text += f"{'-'*33}{'Meta':^22}{'-'*33}\n"
+        text += f"{'='*fill_len}{'Message':^{title_len}}{'='*fill_len}\n"
+        text += f"{'-'*fill_len}{'Meta':^{title_len}}{'-'*fill_len}\n"
         text += f"{self.meta or 'N/A'}\n"
-        text += f"{'-'*33}{'Text':^22}{'-'*33}\n"
+        text += f"{'-'*fill_len}{'Text':^{title_len}}{'-'*fill_len}\n"
         text += self.format_tags() + "\n"
-        text += f"{'='*33}{'=' * 22}{'='*33}\n\n"
+        text += f"{'='*fill_len}{'=' * title_len}{'='*fill_len}\n\n"
 
         return text

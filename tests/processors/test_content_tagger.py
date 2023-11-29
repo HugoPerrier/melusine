@@ -246,20 +246,20 @@ def test_content_tagger_split_text(text, expected_parts):
                 ("GREETINGS", "Vous en souhaitant bonne réception"),
             ],
         ),
-        (
-            # Edge case where a line ends with an isolated character.
+        pytest.param(
             "Un témoignage sous X\nEnvoyé depuis mon téléphone Orange",
             [
                 ("BODY", "Un témoignage sous X"),
                 ("FOOTER", "Envoyé depuis mon téléphone Orange"),
             ],
+            id="Edge case where a line ends with an isolated character"
         ),
-        (
-            # Edge case where the two first lines are missing word characters.
+        pytest.param(
             "     ??\n  !??!",
             [
                 ("BODY", "??!??!"),
             ],
+            id="Edge case where the two first lines are missing word characters"
         ),
         (
             "Bonjour Mme X,\nSuite a blh blah blah.\n"
@@ -458,7 +458,172 @@ def test_content_tagger_split_text(text, expected_parts):
         ),
     ],
 )
-def test_tag_text(text, expected_tags):
+def test_tag_text_generic(text, expected_tags):
+    # Instantiate and apply the Tagger
+    tagger = ContentTagger()
+    output_tags = tagger.tag_text(text)
+    # Test output tags
+    assert output_tags == expected_tags
+
+
+@pytest.mark.parametrize(
+    "text, expected_tags",
+    [
+        pytest.param(
+            (
+                "Merci\n"
+                "Je vous remercie\n"
+                "Merci d'avance\n"
+                "Je vous remercie par avance\n"
+                "Vous en remerciant par avance.\n"
+            ),
+            [
+                ("THANKS", "Merci"),
+                ("THANKS", "Je vous remercie"),
+                ("THANKS", "Merci d'avance"),
+                ("THANKS", "Je vous remercie par avance"),
+                ("THANKS", "Vous en remerciant par avance."),
+            ],
+            id="french thanks patterns",
+        ),
+    ]
+)
+def test_tag_text_french(text, expected_tags):
+    # Instantiate and apply the Tagger
+    tagger = ContentTagger()
+    output_tags = tagger.tag_text(text)
+    # Test output tags
+    assert output_tags == expected_tags
+
+
+@pytest.mark.parametrize(
+    "text, expected_tags",
+    [
+        pytest.param(
+            (
+                    "Thank you so much\n"
+                    "thanks\n"
+                    "thx Joanna\n"
+                    "thanks but you forgot bla\n"
+                    "Thx however I still need the document\n"
+            ),
+            [
+                ("THANKS", "Thank you so much"),
+                ("THANKS", "thanks"),
+                ("THANKS", "thx Joanna"),
+                ("BODY", "thanks but you forgot bla"),
+                ("BODY", "Thx however I still need the document"),
+            ],
+            id="english thanks patterns",
+        ),
+        pytest.param(
+            (
+                    "Best\n"
+                    "warm Wishes\n"
+                    "regards\n"
+                    "best regards\n"
+                    "cheers\n"
+                    "yours\n"
+                    "yours truly\n"
+                    "Sincerely\n"
+                    "see you soon\n"
+                    "Speak to you soon\n"
+                    "talk soon\n"
+                    "Take care\n"
+                    "Catch you later\n"
+                    "Have a fantastic day\n"
+                    "Looking forward to your reply\n"
+                    "I am looking forward to hearing from you\n"
+                    "Hoping to hear from you\n"
+            ),
+            [
+                ("GREETINGS", "Best"),
+                ("GREETINGS", "warm Wishes"),
+                ("GREETINGS", "regards"),
+                ("GREETINGS", "best regards"),
+                ("GREETINGS", "cheers"),
+                ("GREETINGS", "yours"),
+                ("GREETINGS", "yours truly"),
+                ("GREETINGS", "Sincerely"),
+                ("GREETINGS", "see you soon"),
+                ("GREETINGS", "Speak to you soon"),
+                ("GREETINGS", "talk soon"),
+                ("GREETINGS", "Take care"),
+                ("GREETINGS", "Catch you later"),
+                ("GREETINGS", "Have a fantastic day"),
+                ("GREETINGS", "Looking forward to your reply"),
+                ("GREETINGS", "I am looking forward to hearing from you"),
+                ("GREETINGS", "Hoping to hear from you"),
+            ],
+            id="english greetings",
+        ),
+        pytest.param(
+            (
+                    "Hello John\n"
+                    "hi\n"
+                    "Hi there\n"
+                    "good to hear from you\n"
+                    "it is good to hear from you\n"
+                    "I hope you are having a great week\n"
+                    "how are you doing\n"
+                    "how are you positioned about the matter\n"
+                    "i hope you are doing well\n"
+                    "Good Morning Joanna\n"
+                    "good Afternoon\n"
+                    "Dear Jacky\n"
+                    "Sir\n"
+                    "Dear Madam\n"
+                    "Dear Mr\n"
+                    "Dear Ms.\n"
+                    "Dear miss\n"
+                    "Dear mrs.\n"
+                    "Dear sir or madam\n"
+                    "To whom it may concern\n"
+            ),
+            [
+                ("HELLO", "Hello John"),
+                ("HELLO", "hi"),
+                ("HELLO", "Hi there"),
+                ("HELLO", "good to hear from you"),
+                ("HELLO", "it is good to hear from you"),
+                ("HELLO", "I hope you are having a great week"),
+                ("HELLO", "how are you doing"),
+                ("BODY", "how are you positioned about the matter"),
+                ("HELLO", "i hope you are doing well"),
+                ("HELLO", "Good Morning Joanna"),
+                ("HELLO", "good Afternoon"),
+                ("HELLO", "Dear Jacky"),
+                ("HELLO", "Sir"),
+                ("HELLO", "Dear Madam"),
+                ("HELLO", "Dear Mr"),
+                ("HELLO", "Dear Ms."),
+                ("HELLO", "Dear miss"),
+                ("HELLO", "Dear mrs."),
+                ("HELLO", "Dear sir or madam"),
+                ("HELLO", "To whom it may concern"),
+            ],
+            id="english hello",
+        ),
+        pytest.param(
+            (
+                    "VP of Data Science\n"
+                    "Chief of staff\n"
+                    "CTO at TestMelusine\n"
+                    "CEOABC test\n"
+                    "Lead business developer\n"
+            ),
+            [
+                ("SIGNATURE", "VP of Data Science"),
+                ("SIGNATURE", "Chief of staff"),
+                ("SIGNATURE", "CTO at TestMelusine"),
+                ("BODY", "CEOABC test"),
+                ("SIGNATURE", "Lead business developer"),
+            ],
+            id="english job signature patterns",
+        ),
+    ]
+)
+def test_tag_text_english(text, expected_tags):
     # Instantiate and apply the Tagger
     tagger = ContentTagger()
     output_tags = tagger.tag_text(text)

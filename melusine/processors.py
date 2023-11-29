@@ -1183,6 +1183,7 @@ class ContentTagger(BaseContentTagger):
     - GREETINGS
     - SIGNATURE
     """
+    ENGLISH_TIMES = ["day", "morning", "afternoon", "evening", "night", "week(-?end)?"]
 
     def __init__(
         self,
@@ -1227,6 +1228,7 @@ class ContentTagger(BaseContentTagger):
         Watchout, this tag typically marks the end of a message.
         Ex: "Cordialement"
         """
+        english_times_pattern = "|".join(self.ENGLISH_TIMES)
         return [
             r"^.{0,30}cordialement.{0,30}$",
             r"^.{0,5}sinc[èe]rement.{0,30}$",
@@ -1246,6 +1248,19 @@ class ContentTagger(BaseContentTagger):
             r"^.{0,3}votre bien d[ée]vou[ée]e?.{0,3}$",
             r"^.{0,3}amicalement votre.{0,3}$",
             r"^.{,3}je vous prie de croire.{,50}(expression|assurance)?.{,50}(consideration|salutations|sentiments).{,30}$",
+            # English
+            r"^.{0,3}regards.{0,3}$",
+            r"^.{0,3}(best|warm|kind|my) *(regards|wishes)?.{0,3}$",
+            r"^.{0,3}(yours)? *(truly|sincere?ly|respectfull?y|faithfully).{0,3}$",
+            r"^.{0,3}yours.{0,3}$",
+            r"^.{0,3}cheers.{0,3}$",
+            "^.{0,3}(talk|write|see you|speak to you) soon.{0,3}$",
+            "^.{0,3}take care.{0,3}$",
+            "^.{0,3}catch you later.{0,3}$",
+            fr"^.{{0,3}}have an? (blessed|excellent|good|fantastic|great) ({english_times_pattern}).{{0,3}}$",
+            r"i am looking forward to hearing from you.{0,3}$",
+            "^.{0,3}looking forward to your reply.{0,3}$",
+            "^.{0,3}hoping to hear from you( soon)?.{0,3}$",
         ]
 
     @Tag
@@ -1256,6 +1271,7 @@ class ContentTagger(BaseContentTagger):
         Ex1: "Bonjour"
         Ex2: "Bonne année"
         """
+        english_times_pattern = "|".join(self.ENGLISH_TIMES)
 
         # === Souhaits de bonheur ===
         # J'espère que vous avez passé un bon week-end, etc
@@ -1288,11 +1304,25 @@ class ContentTagger(BaseContentTagger):
             r"monsieur",
             r"mesdames",
             r"messieurs",
+            # English
+            fr"good {english_times_pattern}",
+            r"hi( there)?",
+            r"hello",
+            r"greetings",
+            r"dear",
+            r"dear (m(rs?|s)\.?|miss|madam|mister|sir)( or (m(rs?|s)\.?|miss|madam|mister|sir))?",
+            r"sir",
+            r"how are you (doing|today)",
+            r"(it is|it's)? ?(good|great) to hear from you",
+            r"i hope (you are|you're)( doing)? well",
+            fr"i hope (you are|you're) having an? ?(great|wonderful|fantastic)? ({english_times_pattern})",
+            r"i hope this email finds you well",
+            r"to whom it may concern",
         ]
         hello_pattern = "|".join(hello_words_list)
 
         return [
-            r"^.{0,10}((?:" + hello_pattern + r")\b\s*){1,3}(\w+\b\s*){,4}.{,3}(?!.)$",
+            r"^.{0,10}((\b" + hello_pattern + r")\b\s*){1,3}(\w+\b\s*){,4}.{,3}(?!.)$",
             rf"^.{{0,16}}(?:{'|'.join(deb_bon_list)}) \b(?:{'|'.join(bon_list)}).{{0,40}}$",
         ]
 
@@ -1338,14 +1368,14 @@ class ContentTagger(BaseContentTagger):
             r"Pensez a l'environnement avant d'imprimer ce message",
             r"Droit a la d[ée]connexion",
             r"Ceci est un mail automatique",
-            # Anglais
+            r"Les formats de fichiers acceptés sont : PDF, DOC, DOCX, JPEG, JPG, TIFF, TXT, ODT, XLS, XLSX",
+            r"Tout autre format de fichiers ne sera pas transmis au dossier",
+            # English
             r"This message and any attachments are confidential",
             r"This e-mail and any files transmitted",
             r"If you have received this (?:message|email) in error",
             r"Any unauthorized modification",
             r"The sender shall not be liable",
-            r"Les formats de fichiers acceptés sont : PDF, DOC, DOCX, JPEG, JPG, TIFF, TXT, ODT, XLS, XLSX",
-            r"Tout autre format de fichiers ne sera pas transmis au dossier",
         ]
 
         diclaimer_regex_list = [f"{prefix}{x}{suffix}" for x in text_list]
@@ -1377,8 +1407,10 @@ class ContentTagger(BaseContentTagger):
             r"^.{0,2}Courrier.{0,2}$",
             r"^.{0,2}Pour Windows.{0,2}$",
             r"^.{0,10}Scann[ée] avec.{,30}$",
-            r"^.{0,5}Sent with .*",
             r"^.{,3}sans virus.{,3}$",
+            # English
+            r"^.{0,5}Sent with .*",
+            r"^.{0,5}Sent from my .*",
         ]
 
         return diclaimer_regex_list + miscellaneous_footer_regex
@@ -1389,8 +1421,28 @@ class ContentTagger(BaseContentTagger):
         Tag associated with email thanks sentences.
         Ex: "Merci beaucoup"
         """
+        thanks_expressions = [
+            r"(re)?(merci(e|ant)?(\s(d'|par)\s?avance)?)",
+            r"thanks?( you)?",
+            r"thx",
+        ]
+        thanks_pattern = r"\b(" + "|".join(thanks_expressions) + r")\b"
+
+        exception_expressions = [
+            r"de",
+            r"d",
+            r"mais",
+            r"cependant",
+            r"par contre",
+            r"toutefois",
+            r"pourtant",
+            r"but",
+            r"however",
+        ]
+        exception_pattern = r" *\b(" + "|".join(exception_expressions) + ") *"
+
         return [
-            r"^.{0,20}\b(?:re)?(?:mercie?(?:\s(?:d'|par)\s?avance)?)(?!.{0,5}(?:\s*de\s*|d\b|mais|cependant|par contre|toutefois|pourtant)).{0,40}(?!.)",  # noqa
+            r"^.{0,20}" + thanks_pattern + r"(?!.{0,5}" + exception_pattern + r").{0,40}(?!.)",
         ]
 
     @Tag
@@ -1420,8 +1472,13 @@ class ContentTagger(BaseContentTagger):
             r"s\.a\.s\.",
             r"squad",
             r"charg[ée]e? d['e]\s*\w+(?:\s*\w+){,2}",
+            # English
+            r"Lead",
+            r"Chief",
+            r"VP",
+            r"C.O",
         ]
-        job_regex = r"(?:" + r"|".join(jobs) + r")"
+        job_regex = r"\b(" + r"|".join(jobs) + r")\b"
         line_with_known_job = rf"(?:^ *.{{,5}}{job_regex}( +{self.word_block(6)})?(?:\n+|$))"
 
         # Street address regex

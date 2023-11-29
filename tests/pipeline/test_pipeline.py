@@ -1,8 +1,6 @@
 """
 Unit test for pipeline.py
 """
-from typing import Optional
-
 import pandas as pd
 import pytest
 

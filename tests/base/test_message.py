@@ -1,5 +1,6 @@
 import re
 
+from melusine import config
 from melusine.message import Message
 
 
@@ -177,3 +178,10 @@ def test_str_no_tags():
     assert len(result.splitlines()) == len(expected_list)
     for text_line, regex in zip(result.splitlines(), expected_list):
         assert re.match(regex, text_line)
+
+
+def test_str_no_conf(reset_melusine_config):
+    config.reset({"Test": "Test"})
+    message = Message(text="test", tags=[("TEST TAG", "TEST TEXT")])
+    print(message)
+    assert True

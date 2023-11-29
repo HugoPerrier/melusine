@@ -1,8 +1,6 @@
 """
 Unit test for processors.py
 """
-from tempfile import TemporaryDirectory
-
 import pytest
 
 from melusine.processors import (
