@@ -4,7 +4,6 @@ def test_tutorial002(add_docs_to_pythonpath):
     _ = run001()
 
 
-
 def test_tutorial002(add_docs_to_pythonpath):
     from docs_src.MelusineDetectors.tutorial002 import run as run002
 

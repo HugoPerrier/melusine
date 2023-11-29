@@ -5,7 +5,7 @@ Let's run **emergency detection** with melusine :
 * Load a fake email dataset
 * Load a demonstration pipeline
 * Run the pipeline  
-    * Apply text cleaning transformations  
+    * Apply email cleaning transformations  
     * Apply emergency detection
 
 ## Input data
