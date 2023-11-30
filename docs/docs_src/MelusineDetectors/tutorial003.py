@@ -1,4 +1,5 @@
 import re
+
 import pandas as pd
 
 from melusine.base import MelusineDetector
@@ -19,7 +20,7 @@ class MyVirusDetector(MelusineDetector):
         super().__init__(
             input_columns=[self.body_column, self.header_column],
             output_columns=[self.OUTPUT_RESULT_COLUMN],
-            name="virus"
+            name="virus",
         )
         # --8<-- [end:detector_init]
 
@@ -48,21 +49,17 @@ class MyVirusDetector(MelusineDetector):
 
         if debug_mode:
             positive_match_text = (
-                positive_match.string[positive_match.start():positive_match.end()] if positive_match else None
+                positive_match.string[positive_match.start() : positive_match.end()] if positive_match else None
             )
             negative_match_text = (
-                positive_match.string[negative_match.start():negative_match.end()] if negative_match else None
+                positive_match.string[negative_match.start() : negative_match.end()] if negative_match else None
             )
-            row[self.debug_dict_col].update({
-                "positive_match_data": {
-                    "result": bool(positive_match),
-                    "match_text": positive_match_text
-                },
-                "negative_match_data": {
-                    "result": bool(negative_match),
-                    "match_text": negative_match_text
-                },
-            })
+            row[self.debug_dict_col].update(
+                {
+                    "positive_match_data": {"result": bool(positive_match), "match_text": positive_match_text},
+                    "negative_match_data": {"result": bool(negative_match), "match_text": negative_match_text},
+                }
+            )
 
         return row
         # --8<-- [end:detect]
@@ -77,6 +74,8 @@ class MyVirusDetector(MelusineDetector):
         return row
 
     # --8<-- [end:post_detect]
+
+
 # --8<-- [end:detector]
 
 
@@ -84,12 +83,14 @@ def run():
     # --8<-- [start:run]
     detector = MyVirusDetector(body_column="body", header_column="header")
 
-    df = pd.DataFrame([
-        {"body": "This is a dangerous virus", "header": "test"},
-        {"body": "test", "header": "test"},
-        {"body": "test", "header": "viruses are dangerous"},
-        {"body": "corona virus is annoying", "header": "test"},
-    ])
+    df = pd.DataFrame(
+        [
+            {"body": "This is a dangerous virus", "header": "test"},
+            {"body": "test", "header": "test"},
+            {"body": "test", "header": "viruses are dangerous"},
+            {"body": "corona virus is annoying", "header": "test"},
+        ]
+    )
     df.debug = True
 
     df = detector.transform(df)

@@ -11,14 +11,22 @@ is performed in a `MelusinePipeline`.
 The `MelusineDetector` class splits detection into three steps:
 
 - `pre_detect`: Select/combine the inputs needed for detection.
-Ex: Select the text parts tagged as `BODY` and combine it with the text 
+Ex: Select the text parts tagged as `BODY` and combine them with the text 
 in the email header.
 - `detect`: Use regular expressions, ML models or heuristics to run detection
 on the input text.
-- `post_detect`: Run rules such as thresholding or combine results from multiple models.
+- `post_detect`: Run detection rules such as thresholding or combine results from multiple models.
 
 The method `transform` is defined by the BaseClass `MelusineDetector` and will call 
 the pre_detect/detect/post_detect methods in turn (Template pattern).
+
+```Python
+# Instantiate Detector
+detector = MyDetector()
+
+# Run pre_detect, detect and post_detect on input data
+data_with_detection = detector.transform(data)
+```
 
 Here is the full code of a MelusineDetector to detect emails related to viruses. 
 The next sections break down the different parts of the code.

@@ -252,14 +252,14 @@ def test_content_tagger_split_text(text, expected_parts):
                 ("BODY", "Un témoignage sous X"),
                 ("FOOTER", "Envoyé depuis mon téléphone Orange"),
             ],
-            id="Edge case where a line ends with an isolated character"
+            id="Edge case where a line ends with an isolated character",
         ),
         pytest.param(
             "     ??\n  !??!",
             [
                 ("BODY", "??!??!"),
             ],
-            id="Edge case where the two first lines are missing word characters"
+            id="Edge case where the two first lines are missing word characters",
         ),
         (
             "Bonjour Mme X,\nSuite a blh blah blah.\n"
@@ -486,7 +486,7 @@ def test_tag_text_generic(text, expected_tags):
             ],
             id="french thanks patterns",
         ),
-    ]
+    ],
 )
 def test_tag_text_french(text, expected_tags):
     # Instantiate and apply the Tagger
@@ -501,11 +501,11 @@ def test_tag_text_french(text, expected_tags):
     [
         pytest.param(
             (
-                    "Thank you so much\n"
-                    "thanks\n"
-                    "thx Joanna\n"
-                    "thanks but you forgot bla\n"
-                    "Thx however I still need the document\n"
+                "Thank you so much\n"
+                "thanks\n"
+                "thx Joanna\n"
+                "thanks but you forgot bla\n"
+                "Thx however I still need the document\n"
             ),
             [
                 ("THANKS", "Thank you so much"),
@@ -518,23 +518,23 @@ def test_tag_text_french(text, expected_tags):
         ),
         pytest.param(
             (
-                    "Best\n"
-                    "warm Wishes\n"
-                    "regards\n"
-                    "best regards\n"
-                    "cheers\n"
-                    "yours\n"
-                    "yours truly\n"
-                    "Sincerely\n"
-                    "see you soon\n"
-                    "Speak to you soon\n"
-                    "talk soon\n"
-                    "Take care\n"
-                    "Catch you later\n"
-                    "Have a fantastic day\n"
-                    "Looking forward to your reply\n"
-                    "I am looking forward to hearing from you\n"
-                    "Hoping to hear from you\n"
+                "Best\n"
+                "warm Wishes\n"
+                "regards\n"
+                "best regards\n"
+                "cheers\n"
+                "yours\n"
+                "yours truly\n"
+                "Sincerely\n"
+                "see you soon\n"
+                "Speak to you soon\n"
+                "talk soon\n"
+                "Take care\n"
+                "Catch you later\n"
+                "Have a fantastic day\n"
+                "Looking forward to your reply\n"
+                "I am looking forward to hearing from you\n"
+                "Hoping to hear from you\n"
             ),
             [
                 ("GREETINGS", "Best"),
@@ -559,26 +559,26 @@ def test_tag_text_french(text, expected_tags):
         ),
         pytest.param(
             (
-                    "Hello John\n"
-                    "hi\n"
-                    "Hi there\n"
-                    "good to hear from you\n"
-                    "it is good to hear from you\n"
-                    "I hope you are having a great week\n"
-                    "how are you doing\n"
-                    "how are you positioned about the matter\n"
-                    "i hope you are doing well\n"
-                    "Good Morning Joanna\n"
-                    "good Afternoon\n"
-                    "Dear Jacky\n"
-                    "Sir\n"
-                    "Dear Madam\n"
-                    "Dear Mr\n"
-                    "Dear Ms.\n"
-                    "Dear miss\n"
-                    "Dear mrs.\n"
-                    "Dear sir or madam\n"
-                    "To whom it may concern\n"
+                "Hello John\n"
+                "hi\n"
+                "Hi there\n"
+                "good to hear from you\n"
+                "it is good to hear from you\n"
+                "I hope you are having a great week\n"
+                "how are you doing\n"
+                "how are you positioned about the matter\n"
+                "i hope you are doing well\n"
+                "Good Morning Joanna\n"
+                "good Afternoon\n"
+                "Dear Jacky\n"
+                "Sir\n"
+                "Dear Madam\n"
+                "Dear Mr\n"
+                "Dear Ms.\n"
+                "Dear miss\n"
+                "Dear mrs.\n"
+                "Dear sir or madam\n"
+                "To whom it may concern\n"
             ),
             [
                 ("HELLO", "Hello John"),
@@ -606,11 +606,11 @@ def test_tag_text_french(text, expected_tags):
         ),
         pytest.param(
             (
-                    "VP of Data Science\n"
-                    "Chief of staff\n"
-                    "CTO at TestMelusine\n"
-                    "CEOABC test\n"
-                    "Lead business developer\n"
+                "VP of Data Science\n"
+                "Chief of staff\n"
+                "CTO at TestMelusine\n"
+                "CEOABC test\n"
+                "Lead business developer\n"
             ),
             [
                 ("SIGNATURE", "VP of Data Science"),
@@ -621,7 +621,7 @@ def test_tag_text_french(text, expected_tags):
             ],
             id="english job signature patterns",
         ),
-    ]
+    ],
 )
 def test_tag_text_english(text, expected_tags):
     # Instantiate and apply the Tagger

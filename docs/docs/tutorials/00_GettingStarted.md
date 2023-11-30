@@ -31,11 +31,11 @@ The present tutorial only makes use of the **body** and **header** data.
 
 A typical code for a melusine-based application looks like this :
 
-
 ```Python
-{!../docs_src/GettingStarted/tutorial001.py!}
+--8<--
+docs_src/GettingStarted/tutorial001.py:simple_pipeline
+--8<--
 ```
-
 
 1. This tutorial uses one of the default pipeline configuration `demo_pipeline`. Melusine users will typically define their own pipeline configuration.
    See more in the [Configurations tutorial](06_Configurations.md){target=_blank}
@@ -88,10 +88,12 @@ flowchart LR
 
 End users typically want to know what lead melusine to a specific detection result. The debug mode generates additional explainability info.
 
-```Python hl_lines="8"
-
-{!../docs_src/GettingStarted/tutorial002.py!}
+```Python
+--8<--
+docs_src/GettingStarted/tutorial002.py:debug_pipeline
+--8<--
 ```
+
 
 A new column `debug_emergency` is created.
 

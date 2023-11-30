@@ -1183,6 +1183,7 @@ class ContentTagger(BaseContentTagger):
     - GREETINGS
     - SIGNATURE
     """
+
     ENGLISH_TIMES = ["day", "morning", "afternoon", "evening", "night", "week(-?end)?"]
 
     def __init__(

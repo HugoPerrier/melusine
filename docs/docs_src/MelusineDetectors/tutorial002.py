@@ -23,7 +23,7 @@ class MyVirusDetector(MelusineDetector):
         super().__init__(
             input_columns=[self.body_column, self.header_column],
             output_columns=[self.OUTPUT_RESULT_COLUMN],
-            name="virus"
+            name="virus",
         )
         # --8<-- [end:detector_init]
 
@@ -55,17 +55,21 @@ class MyVirusDetector(MelusineDetector):
         return df
 
     # --8<-- [end:post_detect]
+
+
 # --8<-- [end:detector]
 
 
 def run():
     # --8<-- [start:run]
-    df = pd.DataFrame([
-        {"body": "This is a dangerous virus", "header": "test"},
-        {"body": "test", "header": "test"},
-        {"body": "test", "header": "viruses are dangerous"},
-        {"body": "corona virus is annoying", "header": "test"},
-    ])
+    df = pd.DataFrame(
+        [
+            {"body": "This is a dangerous virus", "header": "test"},
+            {"body": "test", "header": "test"},
+            {"body": "test", "header": "viruses are dangerous"},
+            {"body": "corona virus is annoying", "header": "test"},
+        ]
+    )
 
     detector = MyVirusDetector(body_column="body", header_column="header")
 

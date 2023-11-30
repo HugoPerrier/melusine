@@ -98,24 +98,6 @@ class MelusineTransformer(BaseEstimator, TransformerMixin, IoMixin):
             columns = [columns]
         return list(columns)
 
-    def fit(self, df: MelusineDataset, y: Optional[pd.Series] = None) -> MelusineTransformer:
-        """
-        Fit a transformer.
-
-        Parameters
-        ----------
-        df: MelusineDataset
-            Input data.
-        y: pd.Series
-            Target data.
-
-        Returns
-        -------
-        _: MelusineTransformer
-            Fitted instance.
-        """
-        return self
-
     def transform(self, data: MelusineDataset) -> MelusineDataset:
         """
         Transform input data.
