@@ -1,5 +1,7 @@
 name: Build & Test
-on: push
+on:
+  push:
+  workflow_call:
 
 jobs:
   lint:
@@ -40,10 +42,3 @@ jobs:
     steps:
       - name: Coverage Badge
         uses: codecov/codecov-action@v3
-
-  deploy:
-    name: Deploy python package
-    needs: test
-    runs-on: ubuntu-latest
-    steps:
-      - run: echo "Deploying .."
