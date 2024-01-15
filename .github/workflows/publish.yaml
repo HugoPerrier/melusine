@@ -9,7 +9,7 @@ jobs:
     uses: ./.github/workflows/main.yml
   deploy:
     name: Deploy python package
-    needs: main
+    needs: test
     runs-on: ubuntu-latest
     steps:
       - run: echo "Deploying .."
