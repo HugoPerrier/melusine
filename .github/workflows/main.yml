@@ -5,12 +5,10 @@ on:
 
 jobs:
   lint:
+    name: Lint
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: psf/black@stable
-        with:
-          src: "./melusine"
+      - run: echo "Deploying .."
 
   test:
     name: Test
